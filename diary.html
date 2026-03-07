@@ -127,34 +127,63 @@
     </main>
 
     <div id="profileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300"> 
+
          <div class="bg-[#FDFBF7] w-11/12 max-w-md rounded-3xl shadow-xl p-8 transform scale-95 transition-transform duration-300" id="profileCard"> 
+
              <h2 class="text-xl font-medium text-[#4A4A4A] mb-2">欢迎来到你的专属树洞</h2> 
+
              <p class="text-sm text-[#888888] mb-6 leading-relaxed">为了让老师的分析更精准，请简单设置一下孩子的情况。信息仅保存在你的本地设备，绝对隐私。</p> 
+
  
+
              <div class="space-y-4"> 
+
                  <div> 
+
                      <label class="block text-sm text-[#888888] mb-1">孩子年龄</label> 
+
                      <input type="number" id="childAge" placeholder="例如：14" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all"> 
+
                  </div> 
+
                  <div> 
+
                      <label class="block text-sm text-[#888888] mb-1">孩子性别</label> 
+
                      <select id="childGender" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all"> 
+
                          <option value="男孩">男孩</option> 
+
                          <option value="女孩">女孩</option> 
+
                          <option value="不愿透露"></option> 
+
                      </select> 
+
                  </div> 
+
                  <div> 
+
                      <label class="block text-sm text-[#888888] mb-1">主要困扰或确诊情况 (一句话概括)</label> 
+
                      <input type="text" id="childDiagnosis" placeholder="如：ADHD伴随ODD，极度抗拒写作业" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all"> 
+
                  </div> 
+
              </div> 
+
  
+
              <button onclick="saveProfileAndClose()" class="w-full mt-8 bg-[#8BA88E] text-white py-3 rounded-full font-medium tracking-wide hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300"> 
+
                  保存设置并进入 
+
              </button> 
+
          </div> 
+
      </div>
+
 
     <div id="toast" class="fixed top-10 transform -translate-y-full opacity-0 bg-[#3C3C3C] text-white px-6 py-3 rounded-full shadow-lg transition-all duration-500 z-50 pointer-events-none">
 
@@ -175,53 +204,92 @@
         let currentMode = 'record';
 
          // 页面加载完毕后，检查是否有档案 
+
          document.addEventListener('DOMContentLoaded', () => { 
+
              const savedProfile = localStorage.getItem('child_profile'); 
+
              // 如果在本地缓存没找到档案，就弹出设置窗口 
+
              if (!savedProfile) { 
+
                  const modal = document.getElementById('profileModal'); 
+
                  const card = document.getElementById('profileCard'); 
+
                  modal.classList.remove('hidden'); 
+
                  // 延迟 10 毫秒触发 CSS 动画，让弹窗柔和地浮现出来 
+
                  setTimeout(() => { 
+
                      modal.classList.remove('opacity-0'); 
+
                      card.classList.remove('scale-95'); 
+
                  }, 10); 
+
              } 
+
          }); 
+
  
+
          // 保存档案并关闭弹窗 
+
          function saveProfileAndClose() { 
+
              const age = document.getElementById('childAge').value || '未知年龄'; 
+
              const gender = document.getElementById('childGender').value; 
+
              const diagnosis = document.getElementById('childDiagnosis').value || '未填写具体特质'; 
+
  
+
              // 把这三个字段捏合成一句给 AI 看的“咒语” 
+
              const profileString = `${age}岁，${gender}。特质与困扰：${diagnosis}`; 
+
              
+
              // 存入本地 LocalStorage 
+
              localStorage.setItem('child_profile', profileString); 
+
  
+
              // 触发关闭动画 
+
              const modal = document.getElementById('profileModal'); 
+
              const card = document.getElementById('profileCard'); 
+
              modal.classList.add('opacity-0'); 
+
              card.classList.add('scale-95'); 
+
              
+
              // 等动画播完 (300ms) 后彻底隐藏 
+
              setTimeout(() => { 
+
                  modal.classList.add('hidden'); 
+
                  showToast("孩子信息已安妥保存"); 
+
              }, 300); 
+
          }
+
+
 
 
 
         // 切换模式 UI 逻辑
 
         function switchMode(mode) {
-
-            currentMode = mode;
 
             const btnRecord = document.getElementById('modeRecord');
 
@@ -253,6 +321,8 @@
 
 
 
+
+
         // 显示 Toast 提示
 
         function showToast(message) {
@@ -274,6 +344,8 @@
             }, 3000);
 
         }
+
+
 
 
 
@@ -349,6 +421,8 @@
 
 
 
+
+
         // 保存日记到本地 LocalStorage
 
         function saveToLocal(text) {
@@ -369,202 +443,294 @@
 
 
 
+
+
         // 核心：调用 DeepSeek API
 
         async function callDeepSeekAPI(userText) {
 
             // 🌟 这是融合了深度神经科学与临床干预技术的"专家级大脑" 🌟
-            const systemPrompt = `你是一位专注解决 ADHD/ASD 及 ODD 青少年行为问题的资深临床行为分析师。家长现在正处于高压、耗竭或权力斗争的旋涡中。你的回复必须专业、客观、极其克制，提供具有强支撑力的结构化分析，绝不能有“哄小宝宝”的幼稚感或空洞的安慰。
+
+            const systemPrompt = `你是一位专注解决 ADHD/ASD 及 ODD 青少年行为问题的资深临床行为分析师。家长现在正处于高压、耗竭或权力斗争的旋涡中。你的回复必须专业、客观、极其克制，提供具有强支撑力的结构化分析，绝不能有"哄小宝宝"的幼稚感或空洞的安慰。
 
 【🔴 强制格式与语调约束】
 1. 绝对禁用 Markdown排版（如加粗、#号）、禁用列表序号（如1.2.3.或①②③）。用自然的段落过渡。
-2. 绝对禁用客服套话、说教或废话（如“最后提醒”、“总之”、“希望能帮到你”、“这很正常”）。话说到具体的策略点立刻结束。
+2. 绝对禁用客服套话、说教或废话（如"最后提醒"、"总之"、"希望能帮到你"、"这很正常"）。话说到具体的策略点立刻结束。
 3. 语调要求：冷静、克制、一针见血。用平视的视角，像一位专业的心理督导在和家长复盘案例。
 
 【💬 核心分析路径（自然融合到段落中）】
 1. 锚定情绪与现状：用极简的一句话点出家长目前的耗竭状态或陷入的权力斗争，不加评判。
 2. 剥离表象直击机制（认知重构）：这是你的核心价值！必须灵活运用以下神经科学比喻来打破家长的道德评判：
-   - 动力系统：ADHD遵循“兴趣驱动型神经系统(NICUP)”。他不是懒，他的大脑需要“新奇、挑战、紧迫”这把钥匙才能启动。
-   - 时间感知：他的时间观念像WiFi信号，离“现在”越近越强，离“未来”越远越弱（即“时间盲”）。
-   - 工作记忆：他的工作记忆容量只有常人的六成。就像同时运行太多APP的旧手机，一转身就把你的指令当成后台程序“杀”了。
-   - 情绪失控：他的前额叶发育比同龄人晚30%，情绪系统像一辆“没有减震器的汽车”，同样的颠簸会产生剧烈的弹跳。
-3. 降维打击策略：提供 1 到 2 个极其具体的干预动作。引导家长放弃“灭火模式”，开启“陪烧模式”（身体在场、语言最小化）。对于青少年，强调建立边界、外部化执行功能（如环境减法）或退出权力斗争。
+   - 动力系统：ADHD遵循"兴趣驱动型神经系统(NICUP)"。他不是懒，他的大脑需要"新奇、挑战、紧迫"这把钥匙才能启动。
+   - 时间感知：他的时间观念像WiFi信号，离"现在"越近越强，离"未来"越远越弱（即"时间盲"）。
+   - 工作记忆：他的工作记忆容量只有常人的六成。就像同时运行太多APP的旧手机，一转身就把你的指令当成后台程序"杀"了。
+   - 情绪失控：他的前额叶发育比同龄人晚30%，情绪系统像一辆"没有减震器的汽车"，同样的颠簸会产生剧烈的弹跳。
+3. 降维打击策略：提供 1 到 2 个极其具体的干预动作。引导家长放弃"灭火模式"，开启"陪烧模式"（身体在场、语言最小化）。对于青少年，强调建立边界、外部化执行功能（如环境减法）或退出权力斗争。
 
 ---
 📚 学习这种专业、克制的说话风格：
 
 看着这些文字，能感觉到你已经被这场无休止的拉锯战耗竭了。每天在同一个问题上爆发冲突，确实让人感到深深的挫败。
 
-他刚答应你去洗澡，转头又去玩手机，这在表面上看是屡教不改和态度恶劣。但从神经学角度看，他的工作记忆容量就像一台同时开了太多网页的旧电脑。当遇到游戏这个强刺激时，你刚才的指令直接被大脑当成无效的后台程序给“杀掉”了。同时，他的时间感知就像微弱的WiFi信号，根本无法体会“十分钟后睡觉”的紧迫感。
+他刚答应你去洗澡，转头又去玩手机，这在表面上看是屡教不改和态度恶劣。但从神经学角度看，他的工作记忆容量就像一台同时开了太多网页的旧电脑。当遇到游戏这个强刺激时，你刚才的指令直接被大脑当成无效的后台程序给"杀掉"了。同时，他的时间感知就像微弱的WiFi信号，根本无法体会"十分钟后睡觉"的紧迫感。
 
-今晚我们先退出反复大声提醒的死循环。你可以试着给他做一次物理上的切断，走到他面前，平视他，用非常简短的一句话下达指令，然后就留在原地看着他，直到他启动。如果他开始烦躁，不要急着去“灭火”或者讲道理，试着开启“陪烧模式”，安静地在旁边陪伴他度过这阵情绪波峰。当你停止进攻和说教，他的防御系统才会慢慢降温。
+今晚我们先退出反复大声提醒的死循环。你可以试着给他做一次物理上的切断，走到他面前，平视他，用非常简短的一句话下达指令，然后就留在原地看着他，直到他启动。如果他开始烦躁，不要急着去"灭火"或者讲道理，试着开启"陪烧模式"，安静地在旁边陪伴他度过这阵情绪波峰。当你停止进攻和说教，他的防御系统才会慢慢降温。
 
 ---
 ⚠️ 安全提醒
 如果家长描述的内容涉及孩子自残、对他人暴力、或家长有轻生念头，请暂停分析，在第一行明确回复：
 由于情况紧急，请您先放下手机，立即拨打当地急救电话（如120/911），或联系当地危机干预热线。您和孩子的人身安全高于一切分析。`
 
-/*
-// 📚 参考案例（学习风格）：
-
-案例1
-
-家长：孩子每次写作业都拖拉，催他就发脾气，说“我就是不想做，你越催我越不做”。试过定计划、给奖励，都没用。他其实能完成，但就是不肯启动。
-
-分析：
-
-这不是“孩子懒”，也不是“他故意对着干”，更不是“奖励不够大”。核心是——启动焦虑 + 控制权争夺。
-
-他不是做不了，是一想到要开始，大脑就卡住了。而你一催，他不是更懒，是更焦虑、更想抢回控制权。
-
-心理机制：1）启动困难：ADHD大脑像冬天的车，冷启动困难；2）催=控制权被剥夺，触发防御；3）奖励对焦虑卡住无效。
-
-建议：①取消“做完作业”的目标，只说“我们先做第一题”；②固定启动仪式（坐下→打开书→深呼吸→设3分钟计时）；③陪同启动，不监督；④用选择权替代命令（“你想5分钟后开始还是10分钟后？”）；⑤情绪不解决，只启动动作。
-
-
-
----
-
-⚠️ 安全提醒
-
-如果家长描述的内容涉及以下情况，请先暂停分析，在回答最前面用加粗红色字体明确提醒家长立即寻求专业医疗或心理援助：
-
-- 孩子有自残、自杀言行
-
-- 孩子对他人使用暴力、持械
-
-- 家长本人有伤害自己或他人的念头
-
-（请在回复中加上一句温馨提示：“由于情况紧急，建议您立即联系您所在地区的专业心理危机干预热线寻求即时帮助。”）
-*/;
-
 
 
             const childProfile = localStorage.getItem('child_profile') || "未知（请根据家长描述推测）"; 
 
+
+
              // 悄悄把孩子信息拼接到后台发送的请求里，家长在界面上看不到这一段 
+
              const enrichedUserText = `【后台隐藏信息：孩子基本情况档案 -> ${childProfile}】\n\n家长的今日描述：\n${userText}`;
+
+
 
             const requestBody = {
 
+
+
                 model: "deepseek-chat",
+
+
 
                 messages: [
 
+
+
                     { role: "system", content: systemPrompt },
+
+
 
                     { role: "user", content: enrichedUserText } // 发送拼接后的内容 
 
+
+
                 ],
+
+
 
                 temperature: 0.7,
 
+
+
                 stream: true 
+
+
 
             };
 
 
 
+
+
+
+
             try {
+
                 // ⚠️ 注意看这里的变化：
+
                 // 1. URL 变成了我们自己的 /api/chat
+
                 // 2. headers 里面去掉了 Authorization 那一行，前端彻底干净了！
+
                 const response = await fetch("/api/chat", {
+
                     method: "POST",
+
                     headers: {
+
                         "Content-Type": "application/json"
+
                     },
+
                     body: JSON.stringify(requestBody)
+
                 });
 
+
+
                 if (!response.ok) {
+
                     throw new Error(`请求失败: ${response.status}`);
+
                 }
+
+
+
+
 
 
 
                 // 处理流式输出 (打字机效果)
 
+
+
                 const reader = response.body.getReader();
+
+
 
                 const decoder = new TextDecoder("utf-8");
 
+
+
                 const resultElement = document.getElementById('aiContent');
+
+
 
                 resultElement.innerHTML = ""; // 清空加载提示
 
 
 
+
+
+
+
                 while (true) {
+
+
 
                     const { done, value } = await reader.read();
 
+
+
                     if (done) break;
 
-                    
+                     
+
+
 
                     const chunk = decoder.decode(value, { stream: true });
 
+
+
                     // DeepSeek 的流式数据按 "data: {...}" 格式返回
+
+
 
                     const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
+
+
                     for (const line of lines) {
+
+
 
                         if (line === 'data: [DONE]') return;
 
+
+
                         if (line.startsWith('data: ')) {
+
+
 
                             try {
 
+
+
                                 const data = JSON.parse(line.substring(6));
+
+
 
                                 if (data.choices[0].delta.content) {
 
+
+
                                     // 将换行符转为 <br> 以在 HTML 中正确显示
+
+
 
                                     let newText = data.choices[0].delta.content.replace(/\n/g, '<br>');
 
-                                    
+                                     
+
+
 
                                     // 简单的安全提醒标红处理（匹配你的加粗红色要求）
 
+
+
                                     if(newText.includes("由于情况紧急")) {
+
+
 
                                         newText = `<span style="color: #ef4444; font-weight: bold;">${newText}</span>`;
 
+
+
                                     }
 
-                                    
+
+
+                                     
+
+
 
                                     resultElement.innerHTML += newText;
 
+
+
                                 }
+
+
 
                             } catch (e) {
 
+
+
                                 console.error("JSON 解析错误", e);
+
+
 
                             }
 
+
+
                         }
+
+
 
                     }
 
+
+
                 }
+
+
 
             } catch (error) {
 
+
+
                 console.error("调用出错:", error);
+
+
 
                 document.getElementById('aiContent').innerText = "抱歉，老师暂时走开了，稍等片刻就回来。";
 
+
+
             }
+
+
 
         }
 
+
+
     </script>
 
+
+
 </body>
+
+
 
 </html>
