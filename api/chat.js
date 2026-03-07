@@ -10,8 +10,14 @@ export default async function handler(req) {
     }
 
     try {
-        // 接收前端（diary.html）传过来的对话数据
-        const body = await req.json();
+        const incomingBody = await req.json();
+
+        // 构造发送给 DeepSeek 的最终请求体
+        const deepseekRequestBody = {
+            ...incomingBody,
+            model: "deepseek-chat", // 确保模型参数存在
+            stream: true // 确保开启流式输出
+        };
 
         // 带着隐藏的 API Key，去请求真实的 DeepSeek 服务器
         const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -21,7 +27,7 @@ export default async function handler(req) {
                 // 🔐 核心安全点：这里的 Key 是从 Vercel 后台的安全环境变量里读出来的，绝对不会暴露给前端
                 'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(deepseekRequestBody)
         });
 
         // 原封不动地把 DeepSeek 返回的“流式数据”管子，直接怼回给前端
