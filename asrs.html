@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成人ADHD自测 (ASRS-6) - ADHD 家长支持</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'paper': '#FDFBF7',
+                        'ink': '#3C3C3C',
+                        'light-gray': '#888888',
+                        'sage': '#8BA88E',
+                        'sage-dark': '#7A967D',
+                    },
+                    fontFamily: {
+                        'serif': ['"Noto Serif SC"', 'serif'],
+                        'sans': ['"Noto Sans SC"', 'sans-serif'],
+                    },
+                    letterSpacing: {
+                        'wide': '0.05em',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            .question-card {
+                background-color: transparent;
+                border: none;
+            }
+            .option-btn {
+                padding: 16px 24px;
+                border-radius: 50px;
+                letter-spacing: 0.05em;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                background-color: #F0F0F0;
+                color: #3C3C3C;
+            }
+            .option-btn.selected, .option-btn:hover {
+                background-color: #E6BEBB; /* 肉桂粉色 */
+                color: white;
+                transform: scale(1.05);
+            }
+            .option-btn:active {
+                transform: scale(0.98);
+            }
+            .question-text {
+                line-height: 1.9;
+                border-bottom: 1px solid;
+                border-image: linear-gradient(to right, transparent, #f0f0f0, transparent) 1;
+                padding-bottom: 24px;
+            }
+            .question-number {
+                color: #D1D1D1;
+                font-size: 1.5rem;
+                margin-right: 1rem;
+            }
+        </style>
+</head>
+<body class="bg-paper text-ink font-sans">
+
+    <!-- Header -->
+    <header class="py-6 px-8 md:px-16 flex justify-between items-center border-b border-gray-200">
+        <a href="/index.html" class="font-serif text-xl font-bold tracking-wider">Sanctuary</a>
+        <nav>
+            <a href="/scales.html" class="text-light-gray hover:text-ink transition-colors duration-300">返回量表列表</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-16 md:py-24 px-8">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="font-serif text-3xl md:text-4xl font-bold leading-tight mb-2">成人ADHD自测 (ASRS-6)</h1>
+                <p class="text-light-gray">请根据您过去 <span class="font-bold text-ink">6个月</span> 的情况，选择最符合您感受的选项。</p>
+            </div>
+
+            <!-- Questions Form -->
+            <div id="questions-container" class="space-y-16">
+                <!-- Questions will be injected here by JS -->
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-12">
+                <button id="submit-btn" class="bg-sage text-white font-medium tracking-wide px-10 py-3.5 rounded-full transition-all duration-300 ease-in-out hover:-translate-y-1 hover:bg-sage-dark hover:shadow-lg hover:shadow-sage/20 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none">
+                    查看结果
+                </button>
+            </div>
+
+            <!-- Result Section (hidden by default) -->
+            <div id="result-container" class="hidden mt-16 text-center p-8 md:p-12 rounded-2xl bg-white border border-gray-200">
+                <h2 class="font-serif text-2xl font-bold mb-4">您的测试结果</h2>
+                <p class="text-light-gray mb-2">您的总分是:</p>
+                <p id="score" class="text-6xl font-bold text-sage mb-6"></p>
+                <p id="interpretation" class="text-ink leading-relaxed max-w-xl mx-auto"></p>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="mt-16 text-xs text-light-gray/80 space-y-4 text-center">
+                <p class="font-bold">⚠️ 本量表仅为筛查工具，结果不能替代专业医疗诊断。如有需要，请咨询专业医生。</p>
+                <p>本量表引自：Adult ADHD Self-Report Scale (ASRS v1.1) 6-question Screener<br>© New York University and the President and Fellows of Harvard College. All rights reserved.<br>使用遵循免费使用政策，量表结构未经修改。请引用：Kessler RC, et al. (2005). Psychological Medicine, 35(2), 245-256.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 px-8 text-center border-t border-gray-200 mt-16">
+        <p class="text-xs text-light-gray">&copy; 2026 Sanctuary. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const questions = [
+                { id: 1, text: '完成工作或任务时，难以专注细节，或粗心犯错？' },
+                { id: 2, text: '在需要保持坐姿时，难以安坐？' },
+                { id: 3, text: '在需要安静的场合，难以保持安静？' },
+                { id: 4, text: '感觉自己像被马达驱动一样，总是要动？' },
+                { id: 5, text: '在组织任务和活动时感到困难？' },
+                { id: 6, text: '当别人对你说话时，常常看起来心不在焉？' },
+            ];
+            const options = [
+                { label: '从不', value: 0 },
+                { label: '很少', value: 1 },
+                { label: '有时', value: 2 },
+                { label: '经常', value: 3 },
+                { label: '非常频繁', value: 4 },
+            ];
+            const answers = {};
+
+            const questionsContainer = document.getElementById('questions-container');
+            const submitBtn = document.getElementById('submit-btn');
+            const resultContainer = document.getElementById('result-container');
+            const scoreEl = document.getElementById('score');
+            const interpretationEl = document.getElementById('interpretation');
+
+            function renderQuestions() {
+                let html = '';
+                questions.forEach(q => {
+                    html += `
+                        <div class="question-card">
+                            <div class="flex items-start">
+                                <span class="question-number font-serif">${String(q.id).padStart(2, '0')}</span>
+                                <p class="question-text text-xl font-serif text-ink flex-1">${q.text}</p>
+                            </div>
+                            <div class="flex flex-wrap gap-3 justify-center mt-8">
+                                ${options.map(opt => `
+                                    <button class="option-btn" data-question="${q.id}" data-value="${opt.value}">
+                                        ${opt.label}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                questionsContainer.innerHTML = html;
+            }
+
+            function checkCompletion() {
+                const allAnswered = Object.keys(answers).length === questions.length;
+                submitBtn.disabled = !allAnswered;
+            }
+
+            questionsContainer.addEventListener('click', function(e) {
+                if (e.target.matches('.option-btn')) {
+                    const questionId = e.target.dataset.question;
+                    const value = parseInt(e.target.dataset.value, 10);
+                    answers[questionId] = value;
+
+                    // Update UI for selected button
+                    const buttons = e.target.parentElement.querySelectorAll('.option-btn');
+                    buttons.forEach(btn => btn.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    
+                    checkCompletion();
+                }
+            });
+
+            submitBtn.addEventListener('click', function() {
+                if (submitBtn.disabled) return;
+
+                const totalScore = Object.values(answers).reduce((sum, val) => sum + val, 0);
+                scoreEl.textContent = totalScore;
+
+                if (totalScore >= 14) {
+                    interpretationEl.textContent = '您的得分提示可能存在中等或以上程度的、与成人ADHD一致的症状。这个结果并不代表您一定有ADHD，但我们强烈建议您咨询专业医生进行全面的评估。';
+                } else {
+                    interpretationEl.textContent = '您的得分在正常范围内，提示您的症状水平较低。但这并不完全排除ADHD的可能性，如果您在日常生活中仍感到困扰，咨询专业人士总是一个好的选择。';
+                }
+
+                questionsContainer.style.display = 'none';
+                submitBtn.style.display = 'none';
+                resultContainer.classList.remove('hidden');
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Initial render
+            renderQuestions();
+            checkCompletion();
+        });
+    </script>
+
+</body>
+</html>

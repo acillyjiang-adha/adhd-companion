@@ -1,0 +1,173 @@
+ 
+ <!DOCTYPE html> 
+ <html lang="zh-CN"> 
+ <head> 
+     <meta charset="UTF-8"> 
+     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+     <title>正向重构卡片 - ADHD守护</title> 
+     <script src="https://cdn.tailwindcss.com"></script> 
+     <style> 
+         /* 核心：CSS 3D 翻转效果 */ 
+         .perspective-1000 { perspective: 1000px; } 
+         .transform-style-3d { transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1); } 
+         .backface-hidden { backface-visibility: hidden; } 
+         .rotate-y-180 { transform: rotateY(180deg); } 
+         
+         /* 卡片基础设定 */ 
+         .card-container { cursor: pointer; } 
+         .card-container.flipped .card-inner { transform: rotateY(180deg); } 
+         .card-front, .card-back { 
+             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+             border-radius: 1.5rem; padding: 2rem; display: flex; flex-direction: column; justify-content: center; 
+         } 
+         .card-back { transform: rotateY(180deg); } 
+ 
+         /* 呼吸动画：柔和的光晕 */ 
+         .breathing-glow { 
+             transition: all ease-in-out; 
+             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); 
+         } 
+     </style> 
+ </head> 
+ <body class="bg-[#FDFBF7] text-[#3C3C3C] font-sans min-h-screen py-16 px-4 sm:px-6 flex flex-col items-center"> 
+ 
+     <div class="max-w-4xl w-full text-center mb-12"> 
+         <h1 class="text-3xl font-medium mb-4 text-[#4A4A4A]">换个角度，接住自己</h1> 
+         <p class="text-[#888888] tracking-wide">当你感到自责、崩溃或在意他人眼光时，请点击翻开这些卡片。</p> 
+     </div> 
+ 
+     <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-3 gap-8"> 
+ 
+         <div class="card-container perspective-1000 h-96" onclick="this.classList.toggle('flipped')"> 
+             <div class="card-inner transform-style-3d relative w-full h-full shadow-sm hover:shadow-md transition-shadow rounded-3xl"> 
+                 <div class="card-front backface-hidden bg-[#F2E2DF] text-center"> 
+                     <span class="text-sm text-[#888888] mb-6 tracking-widest">焦虑思维</span> 
+                     <p class="text-xl leading-relaxed text-[#4A4A4A] font-medium"> 
+                         “我又对他发火了，<br>我真不是个好妈妈...” 
+                     </p> 
+                     <div class="absolute bottom-6 left-0 w-full text-xs text-[#888888] animate-pulse">点击翻转 ↺</div> 
+                 </div> 
+                 <div class="card-back backface-hidden bg-white border-2 border-[#F2E2DF]"> 
+                     <span class="text-sm text-[#E8B4BC] mb-4 font-medium tracking-widest">AI 温暖重构</span> 
+                     <p class="text-[17px] leading-relaxed text-[#4A4A4A]"> 
+                         发火是因为你的情绪容器溢出来了，这说明你已经<strong class="font-bold text-[#E8B4BC]">撑了太久</strong>。 
+                         <br><br> 
+                         承认疲惫并不丢人。接纳自己的不完美，你依然是一个负责、深爱着孩子的母亲。 
+                     </p> 
+                 </div> 
+             </div> 
+         </div> 
+ 
+         <div class="card-container perspective-1000 h-96" onclick="this.classList.toggle('flipped')"> 
+             <div class="card-inner transform-style-3d relative w-full h-full shadow-sm hover:shadow-md transition-shadow rounded-3xl"> 
+                 <div class="card-front backface-hidden bg-[#E1E8E0] text-center"> 
+                     <span class="text-sm text-[#888888] mb-6 tracking-widest">外界刺耳评价</span> 
+                     <p class="text-xl leading-relaxed text-[#4A4A4A] font-medium"> 
+                         “这孩子怎么这么没家教，<br>连安静坐一分钟都做不到？” 
+                     </p> 
+                     <div class="absolute bottom-6 left-0 w-full text-xs text-[#888888] animate-pulse">点击翻转 ↺</div> 
+                 </div> 
+                 <div class="card-back backface-hidden bg-white border-2 border-[#E1E8E0]"> 
+                     <span class="text-sm text-[#8BA88E] mb-4 font-medium tracking-widest">科学认知护盾</span> 
+                     <p class="text-[17px] leading-relaxed text-[#4A4A4A]"> 
+                         这不是教育的失败。 
+                         <br><br> 
+                         多动是孩子神经发育的客观特点，他正在用自己笨拙的方式努力适应世界。外界的误解不重要，<strong class="font-bold text-[#8BA88E]">你的理解，就是他最坚固的铠甲。</strong> 
+                     </p> 
+                 </div> 
+             </div> 
+         </div> 
+ 
+         <div class="card-container perspective-1000 h-96" onclick="flipBreathingCard(this)"> 
+             <div class="card-inner transform-style-3d relative w-full h-full shadow-sm hover:shadow-md transition-shadow rounded-3xl"> 
+                 <div class="card-front backface-hidden bg-[#E0E5EC] text-center"> 
+                     <span class="text-sm text-[#888888] mb-6 tracking-widest">濒临崩溃边缘</span> 
+                     <p class="text-xl leading-relaxed text-[#4A4A4A] font-medium"> 
+                         “我现在大脑一片空白，<br>快要撑不下去了...” 
+                     </p> 
+                     <div class="absolute bottom-6 left-0 w-full text-xs text-[#888888] animate-pulse">点击开启急救包 ↺</div> 
+                 </div> 
+                 <div class="card-back backface-hidden bg-[#8BA88E] text-white flex flex-col items-center justify-center"> 
+                     <p class="text-sm mb-6 opacity-90 tracking-widest">4-7-8 物理急救</p> 
+                     
+                     <div id="breatheCircle" class="w-24 h-24 rounded-full bg-white/20 breathing-glow flex items-center justify-center mb-6"> 
+                         <span id="breatheText" class="text-lg font-medium tracking-wide">准备</span> 
+                     </div> 
+ 
+                     <p class="text-center text-sm opacity-90 px-4 leading-relaxed"> 
+                         跟着节奏呼吸。<br>世界不会因为你暂停这几分钟而崩塌。 
+                     </p> 
+                 </div> 
+             </div> 
+         </div> 
+ 
+     </div> 
+ 
+     <div class="mt-16"> 
+         <a href="index.html" class="px-6 py-2 rounded-full border border-[#D4C9B3] text-[#888888] hover:bg-[#D4C9B3] hover:text-white transition-colors text-sm"> 
+             返回首页 
+         </a> 
+     </div> 
+ 
+     <script> 
+         // 4-7-8 呼吸节拍器核心逻辑 
+         let breathingInterval; 
+ 
+         function flipBreathingCard(cardElement) { 
+             // 切换翻转状态 
+             const isFlipped = cardElement.classList.toggle('flipped'); 
+             
+             if (isFlipped) { 
+                 // 如果翻开，稍微延迟一下开始呼吸动画，等翻转动作完成 
+                 setTimeout(startBreathingCycle, 500); 
+             } else { 
+                 // 如果翻回去，停止呼吸动画 
+                 clearInterval(breathingInterval); 
+                 resetBreathing(); 
+             } 
+         } 
+ 
+         function startBreathingCycle() { 
+             const circle = document.getElementById('breatheCircle'); 
+             const text = document.getElementById('breatheText'); 
+             
+             // 执行一次呼吸循环 
+             function cycle() { 
+                 // 1. 吸气 4 秒 (圆环放大) 
+                 text.innerText = "吸气 4s"; 
+                 circle.style.transform = "scale(1.4)"; 
+                 circle.style.transitionDuration = "4s"; 
+                 circle.style.backgroundColor = "rgba(255, 255, 255, 0.4)"; 
+                 
+                 // 2. 憋气 7 秒 (圆环保持大小不变) 
+                 setTimeout(() => { 
+                     text.innerText = "憋气 7s"; 
+                     circle.style.transitionDuration = "7s"; // 保持状态的平滑 
+                 }, 4000); 
+ 
+                 // 3. 呼气 8 秒 (圆环缩小回原样) 
+                 setTimeout(() => { 
+                     text.innerText = "呼气 8s"; 
+                     circle.style.transform = "scale(1)"; 
+                     circle.style.transitionDuration = "8s"; 
+                     circle.style.backgroundColor = "rgba(255, 255, 255, 0.15)"; 
+                 }, 11000); // 4 + 7 = 11 
+             } 
+ 
+             // 立即执行第一次 
+             cycle(); 
+             // 每 19 秒 (4+7+8) 循环一次 
+             breathingInterval = setInterval(cycle, 19000); 
+         } 
+ 
+         function resetBreathing() { 
+             const circle = document.getElementById('breatheCircle'); 
+             const text = document.getElementById('breatheText'); 
+             circle.style.transform = "scale(1)"; 
+             circle.style.transitionDuration = "0.5s"; 
+             circle.style.backgroundColor = "rgba(255, 255, 255, 0.2)"; 
+             text.innerText = "准备"; 
+         } 
+     </script> 
+ </body> 
+ </html>

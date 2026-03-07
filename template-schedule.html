@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template 01 - 一天通关日程表 (专业加长版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+    
+    <style>
+        @page { size: A4; margin: 0; }
+        body {
+            font-family: "LXGW WenKai", sans-serif;
+            background-color: #e5e5e5;
+            display: flex; justify-content: center; padding: 2rem 0;
+        }
+        .a4-paper {
+            width: 210mm; height: 297mm;
+            background-color: #FDFBF7;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative; overflow: hidden; box-sizing: border-box;
+            padding: 16mm 15mm; /* 稍微缩小上下边距，容纳更丰富的专业结构 */
+            display: flex; flex-direction: column;
+        }
+        @media print {
+            body { background-color: #FDFBF7; padding: 0; }
+            .a4-paper { box-shadow: none; width: 100%; height: 100%; }
+            .no-print { display: none !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+        .task-line {
+            border-bottom: 1.5px dashed #D4C9B3; flex-grow: 1; margin: 0 15px; position: relative; top: -5px;
+        }
+        /* 预计时间的极简填空框 */
+        .time-box {
+            display: inline-block; width: 36px; border-bottom: 1px solid #BDBDBD; text-align: center; margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print fixed top-6 right-6 z-50">
+        <button onclick="window.print()" class="bg-[#8BA88E] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-2 tracking-widest text-sm">
+            <span>🖨️ 立即打印高清版</span>
+        </button>
+        <a href="toolkit.html" class="block text-center mt-3 text-[#888888] text-sm hover:text-[#4A4A4A] transition-colors">返回工具箱</a>
+    </div>
+
+    <div class="a4-paper">
+        
+        <div class="flex justify-between items-end mb-6 border-b-2 border-[#4A4A4A] pb-4">
+            <div>
+                <span class="text-[#8BA88E] text-sm tracking-widest uppercase font-sans">Template 01 / Exec-Function Support</span>
+                <h1 class="text-3xl text-[#4A4A4A] mt-2 tracking-wide font-medium">“一天通关”路线图</h1>
+            </div>
+            <div class="text-[#888888] text-base flex flex-col items-end gap-2">
+                <div>日期：<span class="inline-block w-28 border-b border-[#888888]"></span></div>
+                <div class="text-xs tracking-widest mt-1 opacity-70">状态感知：😊 &nbsp; 😐 &nbsp; ☹️</div>
+            </div>
+        </div>
+
+        <p class="text-[#888888] mb-6 text-[13px] tracking-widest leading-relaxed bg-[#F4F7F4] p-3 rounded-xl border border-[#E1E8E0]/50">
+            使用说明：化繁为简，降低启动大脑的门槛。完成一个任务，请用彩色笔涂满右侧的“能量环”。不需要全部完美，今天只要比昨天多亮起一个环，就是巨大的胜利。
+        </p>
+
+        <div class="mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-7 h-7 rounded-full bg-[#E1E8E0] text-[#8BA88E] flex items-center justify-center font-sans text-xs">01</div>
+                <h2 class="text-lg text-[#4A4A4A] tracking-widest">晨间启动 <span class="text-xs text-[#BDBDBD] ml-2 font-sans">Morning Routine</span></h2>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-[#E1E8E0] space-y-4 shadow-sm">
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">唤醒：喝一杯温水，拉开窗帘</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#E1E8E0]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">洗漱完毕 & 穿戴整齐</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#E1E8E0]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base text-transparent">自定义任务占位符</span>
+                    <div class="task-line" style="border-bottom-style: solid;"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#E1E8E0]"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-7 h-7 rounded-full bg-[#FAF9F5] text-[#D4C9B3] flex items-center justify-center font-sans text-xs">02</div>
+                <h2 class="text-lg text-[#4A4A4A] tracking-widest">放学缓冲 <span class="text-xs text-[#BDBDBD] ml-2 font-sans">Transition</span></h2>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-[#F4F2EE] space-y-4 shadow-sm">
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">能量补充：吃点心 / 喝水</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#D4C9B3]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">感官休息：放空或运动 20 分钟</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#D4C9B3]"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-7 h-7 rounded-full bg-[#F2E2DF] text-[#E8B4BC] flex items-center justify-center font-sans text-xs">03</div>
+                <h2 class="text-lg text-[#4A4A4A] tracking-widest">作业闯关 <span class="text-xs text-[#BDBDBD] ml-2 font-sans">Focus Time</span></h2>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-[#F2E2DF] space-y-5 shadow-sm">
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">清空书桌，只留下当前需要的物品</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#F2E2DF]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">任务 A <span class="text-[#BDBDBD] text-xs ml-2 font-sans">(预计<span class="time-box"></span>分钟)</span></span>
+                    <div class="task-line" style="border-bottom-style: solid;"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#F2E2DF]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">任务 B <span class="text-[#BDBDBD] text-xs ml-2 font-sans">(预计<span class="time-box"></span>分钟)</span></span>
+                    <div class="task-line" style="border-bottom-style: solid;"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#F2E2DF]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">自我核对：检查清单是否全部勾选</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#F2E2DF]"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-auto">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-7 h-7 rounded-full bg-[#F0F0F5] text-[#9A9BB5] flex items-center justify-center font-sans text-xs">04</div>
+                <h2 class="text-lg text-[#4A4A4A] tracking-widest">睡前降落 <span class="text-xs text-[#BDBDBD] ml-2 font-sans">Wind Down</span></h2>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-[#F0F0F5] space-y-4 shadow-sm">
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">照表收纳：准备好明天的书包和衣物</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#9A9BB5]"></div>
+                </div>
+                <div class="flex items-end">
+                    <span class="text-[#5C5C5C] text-base">数字断联：远离屏幕，享受安静时光</span>
+                    <div class="task-line"></div>
+                    <div class="w-5 h-5 rounded-full border-2 border-[#9A9BB5]"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-5 border-t border-[#E1E8E0] flex flex-col gap-3">
+            <h3 class="text-[#8BA88E] tracking-widest text-sm">✦ 今天的微小闪光点 (The Hidden Progress)</h3>
+            <div class="w-full h-10 border-b border-[#D4C9B3] border-dashed"></div>
+        </div>
+
+    </div>
+
+</body>
+</html>

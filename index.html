@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="zh-CN"><head> 
+  
+     <meta charset="UTF-8"> 
+  
+     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  
+     <title>静音 - ADHD守护</title> 
+  
+     <script src="https://cdn.tailwindcss.com"></script> 
+  
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" /> 
+  
+     <style> 
+  
+         body { 
+  
+             font-family: "LXGW WenKai", sans-serif; 
+  
+             background-color: #F9F9F7;  
+  
+             color: #4A4A4A; 
+  
+         } 
+  
+  
+  
+         /* 欢迎语的呼吸与渐隐 */ 
+  
+         .welcome-text { 
+  
+             letter-spacing: 0.15em; line-height: 2; 
+  
+             animation: breathFadeIn 2.5s ease-out forwards; 
+  
+             transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); 
+  
+             max-height: 100px; 
+  
+             overflow: hidden; 
+  
+         } 
+  
+         @keyframes breathFadeIn { 
+  
+             0% { opacity: 0; transform: translateY(8px); } 
+  
+             100% { opacity: 0.6; transform: translateY(0); } 
+  
+         } 
+  
+         .welcome-text.dimmed { opacity: 0.2 !important; } 
+  
+         .welcome-text.hidden-collapse { opacity: 0 !important; max-height: 0; margin-bottom: 0 !important; transform: translateY(-20px); } 
+  
+  
+  
+         /* 输入框的静音质感 */ 
+  
+         .whisper-input { 
+  
+             background-color: #FFFFFF; 
+  
+             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03); 
+  
+             border: 1px solid transparent; 
+  
+             outline: none; 
+  
+             transition: all 1s ease-in-out; 
+  
+         } 
+  
+         .whisper-input::placeholder { color: #A1A1A1; font-weight: 300; letter-spacing: 0.05em; } 
+  
+         .whisper-input:disabled { background-color: #FAF9F5; color: #888888; box-shadow: none; border: 1px solid #F4F2EE; } 
+  
+  
+  
+         #submitArea { transition: all 1s ease; } 
+  
+  
+  
+         /* AI 回信区 */ 
+  
+         .ai-response-area { 
+  
+             max-height: 0; opacity: 0; overflow: hidden; 
+  
+             transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
+  
+         } 
+  
+         .ai-response-area.expanded { 
+  
+             max-height: 2000px;  
+  
+             opacity: 1; margin-top: 2rem; 
+  
+         } 
+  
+         .typing-cursor::after { content: '...'; animation: pulse 1.5s infinite; color: #8BA88E; } 
+  
+  
+  
+         /* 弹窗毛玻璃效果 */ 
+  
+         .glass-modal { 
+  
+             background: rgba(249, 249, 247, 0.85); 
+  
+             backdrop-filter: blur(8px); 
+  
+             -webkit-backdrop-filter: blur(8px); 
+  
+             transition: opacity 0.8s ease; 
+  
+         } 
+  
+  
+  
+         ::-webkit-scrollbar { display: none; } 
+  
+     </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto"> 
+  
+      
+  
+     <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#F2E2DF]/20 to-transparent pointer-events-none"></div> 
+  
+  
+  
+     <div id="onboardingModal" class="fixed inset-0 z-50 glass-modal flex items-center justify-center opacity-0 pointer-events-none"> 
+  
+         <div class="bg-white p-10 sm:p-14 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-[#F4F2EE] w-full max-w-lg transform translate-y-4 transition-transform duration-800" id="modalCard"> 
+  
+             <h2 class="text-2xl text-[#4A4A4A] mb-3 tracking-wide text-center">初次见面</h2> 
+  
+             <p class="text-[#888888] text-sm tracking-widest text-center mb-10 leading-loose"> 
+  
+                 在开始这段旅程前，<br>让我们稍微了解一下你的小探险家。 
+  
+             </p> 
+  
+              
+  
+             <div class="space-y-8"> 
+  
+                 <div> 
+  
+                     <label class="block text-sm text-[#BDBDBD] mb-2 tracking-widest">怎么称呼这个小家伙？</label> 
+  
+                     <input type="text" id="childName" placeholder="例如：浩浩 / 妹妹" class="w-full bg-[#FAF9F5] border-none rounded-xl px-5 py-4 text-[#5C5C5C] focus:ring-2 focus:ring-[#8BA88E]/30 outline-none transition-all"> 
+  
+                 </div> 
+  
+                 <div> 
+  
+                     <label class="block text-sm text-[#BDBDBD] mb-2 tracking-widest">Ta最让你头疼又好笑的一个特质是？</label> 
+  
+                     <input type="text" id="childTrait" placeholder="例如：永远在动 / 拼乐高专注但写字喊累" class="w-full bg-[#FAF9F5] border-none rounded-xl px-5 py-4 text-[#5C5C5C] focus:ring-2 focus:ring-[#8BA88E]/30 outline-none transition-all"> 
+  
+                 </div> 
+  
+             </div> 
+  
+  
+  
+             <div class="mt-12 text-center"> 
+  
+                 <button onclick="saveProfile()" class="bg-[#8BA88E] text-white px-10 py-3.5 rounded-full text-sm tracking-widest hover:shadow-lg hover:-translate-y-1 transition-all duration-300"> 
+  
+                     开启守护日记 
+  
+                 </button> 
+  
+             </div> 
+  
+         </div> 
+  
+     </div> 
+  
+  
+  
+     <div class="w-full max-w-2xl mt-auto mb-auto transition-all duration-1000 flex flex-col" id="mainContainer"> 
+  
+          
+  
+         <div id="welcomeText" class="welcome-text text-center text-xl sm:text-2xl mb-12 sm:mb-16"> 
+  
+             <p>此刻，让世界静音。</p> 
+  
+             <p>这里，只有你自己。</p> 
+  
+         </div> 
+  
+  
+  
+         <div class="relative w-full transition-transform duration-1000 ease-in-out" id="inputWrapper"> 
+  
+             <textarea id="diaryInput" rows="5"  
+  
+                       class="whisper-input w-full rounded-[2rem] p-8 sm:p-12 text-[19px] text-[#5C5C5C] leading-loose resize-none pb-20" 
+  
+                       placeholder="哪怕只是几个字也挺好的..."></textarea> 
+  
+              
+  
+             <div class="absolute bottom-8 right-10 opacity-0 flex items-center gap-8" id="submitArea"> 
+  
+                 <button id="saveBtn" onclick="saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[13px] tracking-widest"> 
+  
+                     <span>默默封存</span> 
+  
+                 </button> 
+  
+                 <button id="submitBtn" onclick="startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[15px] tracking-widest font-medium group"> 
+  
+                     <span id="btnText">听听回音</span> 
+  
+                     <span id="btnArrow" class="text-lg group-hover:translate-x-1 transition-transform">→</span> 
+  
+                 </button> 
+  
+             </div> 
+  
+         </div> 
+  
+  
+  
+         <div id="responseContainer" class="ai-response-area w-full"> 
+  
+             <div id="responseBox" class="bg-white rounded-3xl p-8 sm:p-12 border border-[#E1E8E0] shadow-sm relative"> 
+  
+                 <div id="responseLabel" class="absolute top-8 left-8 flex items-center gap-2 hidden"> 
+  
+                     <div class="w-2 h-2 rounded-full bg-[#8BA88E] animate-pulse"></div> 
+  
+                     <span class="text-[#8BA88E] text-xs tracking-widest">微光回信</span> 
+  
+                 </div> 
+  
+                 <div id="outputText" class="text-[#5C5C5C] leading-loose text-[17px] text-justify mt-8 whitespace-pre-wrap"></div> 
+  
+             </div> 
+  
+              
+  
+             <div class="mt-8 text-center opacity-0 transition-opacity duration-1000" id="bottomNav"> 
+  
+                 <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1"> 
+  
+                     需要物理外挂？前往工具箱 
+  
+                 </a> 
+  
+             </div> 
+  
+         </div> 
+  
+     </div> 
+  
+  
+  
+     <script> 
+  
+         // --- 1. 弹窗与档案管理逻辑 --- 
+  
+         const modal = document.getElementById('onboardingModal'); 
+  
+         const modalCard = document.getElementById('modalCard'); 
+  
+          
+  
+         // 页面加载时检查是否有档案 
+  
+         window.onload = () => { 
+  
+             const childName = localStorage.getItem('adhd_child_name'); 
+  
+             if(!childName) { 
+  
+                 // 如果没有名字，显示弹窗 
+  
+                 modal.classList.remove('opacity-0', 'pointer-events-none'); 
+  
+                 modalCard.classList.remove('translate-y-4'); 
+  
+             } 
+  
+         }; 
+  
+  
+  
+         // 保存档案并关闭弹窗 
+  
+         function saveProfile() { 
+  
+             const name = document.getElementById('childName').value.trim() || '孩子'; 
+  
+             const trait = document.getElementById('childTrait').value.trim() || '活跃'; 
+  
+              
+  
+             localStorage.setItem('adhd_child_name', name); 
+  
+             localStorage.setItem('adhd_child_trait', trait); 
+  
+              
+  
+             // 优雅地隐藏弹窗 
+  
+             modal.classList.add('opacity-0', 'pointer-events-none'); 
+  
+             modalCard.classList.add('translate-y-4'); 
+  
+         } 
+  
+  
+  
+  
+  
+         // --- 2. 页面交互逻辑 --- 
+  
+         const input = document.getElementById('diaryInput'); 
+  
+         const welcome = document.getElementById('welcomeText'); 
+  
+         const submitArea = document.getElementById('submitArea'); 
+  
+         const responseContainer = document.getElementById('responseContainer'); 
+  
+         const responseBox = document.getElementById('responseBox'); 
+  
+         const responseLabel = document.getElementById('responseLabel'); 
+  
+         const outputText = document.getElementById('outputText'); 
+  
+         const mainContainer = document.getElementById('mainContainer'); 
+  
+         const bottomNav = document.getElementById('bottomNav'); 
+  
+  
+  
+         input.addEventListener('focus', () => welcome.classList.add('dimmed')); 
+  
+         input.addEventListener('blur', () => { if(input.value.trim() === '') welcome.classList.remove('dimmed'); }); 
+  
+         input.addEventListener('input', () => { submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0'; }); 
+  
+  
+  
+         function transformStage() { 
+  
+             welcome.classList.add('hidden-collapse'); 
+  
+             input.disabled = true; 
+  
+             mainContainer.classList.remove('mt-auto', 'mb-auto');  
+  
+             mainContainer.classList.add('mt-12');  
+  
+             submitArea.style.opacity = '0'; 
+  
+             setTimeout(() => submitArea.style.display = 'none', 1000); 
+  
+             responseContainer.classList.add('expanded'); 
+  
+         } 
+  
+  
+  
+         function saveSilently() { 
+  
+             if(!input.value.trim()) return; 
+  
+             transformStage(); 
+  
+             responseBox.classList.replace('border-[#E1E8E0]', 'border-[#F4F2EE]'); 
+  
+             responseBox.classList.replace('bg-white', 'bg-[#FAF9F5]'); 
+  
+             outputText.classList.add('text-center', 'text-[#888888]', 'tracking-widest'); 
+  
+             outputText.innerHTML = "情绪已安放。<br>没有评判，只有接纳。"; 
+  
+             setTimeout(() => bottomNav.style.opacity = '1', 800); 
+  
+         } 
+  
+  
+  
+         async function startAIAnalysis() { 
+  
+             const userText = input.value.trim(); 
+  
+             if(!userText) return; 
+  
+  
+  
+             transformStage(); 
+  
+             responseLabel.classList.remove('hidden'); 
+  
+             outputText.classList.add('typing-cursor'); 
+  
+  
+  
+             await fetchDeepSeek(userText); 
+  
+         } 
+  
+  
+  
+  
+  
+         // --- 3. 连接 DeepSeek 的核心逻辑 ---
+
+        async function fetchDeepSeek(text) {
+
+            // 使用安全的后端代理，无需在前端暴露API密钥
+            const API_URL = "/api/chat"; 
+  
+  
+  
+             // 从本地提取刚才填写的孩子档案，让 AI 回复更专属 
+  
+             const childName = localStorage.getItem('adhd_child_name') || '孩子'; 
+  
+             const childTrait = localStorage.getItem('adhd_child_trait') || ''; 
+  
+  
+  
+             const systemPrompt = `你是一位专注解决 ADHD/ASD 及 ODD 青少年行为问题的资深临床行为分析师。家长现在正处于高压、耗竭或权力斗争的旋涡中。 
+  
+ 请注意，这个家长的孩子叫“${childName}”，具有“${childTrait}”的特质。请在回复中自然地称呼孩子的名字。 
+  
+ 你的回复必须专业、客观、极其克制。绝不用Markdown加粗，绝不用列表序号。 
+  
+ 用平视视角，一段话点出家长的耗竭，一段话用神经科学比喻（如时间盲、兴趣驱动、工作记忆像杀后台程序）进行认知重构，最后一段给出一个极其具体的环境减法或物理提示建议。`; 
+  
+  
+  
+             try { 
+
+                const response = await fetch(API_URL, { 
+
+                    method: "POST", 
+
+                    headers: { 
+
+                        "Content-Type": "application/json"
+
+                    }, 
+
+                    body: JSON.stringify({ 
+
+                        messages: [ 
+
+                            { role: "system", content: systemPrompt }, 
+
+                            { role: "user", content: text } 
+
+                        ] 
+
+                    }) 
+
+                }); 
+  
+  
+  
+                 if (!response.ok) throw new Error('网络请求失败'); 
+  
+  
+  
+                 const reader = response.body.getReader(); 
+  
+                 const decoder = new TextDecoder("utf-8"); 
+  
+                 outputText.innerHTML = ""; 
+  
+  
+  
+                 while (true) { 
+  
+                     const { done, value } = await reader.read(); 
+  
+                     if (done) break; 
+  
+                     const chunk = decoder.decode(value, { stream: true }); 
+  
+                     const lines = chunk.split('\n').filter(line => line.trim() !== ''); 
+  
+                      
+  
+                     for (const line of lines) { 
+  
+                         if (line.includes('[DONE]')) break; 
+  
+                         if (line.startsWith('data: ')) { 
+  
+                             try { 
+  
+                                 const data = JSON.parse(line.slice(6)); 
+  
+                                 if (data.choices[0].delta.content) { 
+  
+                                     outputText.innerHTML += data.choices[0].delta.content; 
+  
+                                 } 
+  
+                             } catch (e) {} 
+  
+                         } 
+  
+                     } 
+  
+                 } 
+  
+             } catch (error) { 
+  
+                 outputText.innerHTML = "抱歉，微光暂时未能照达。请检查 API Key 是否正确填写，或稍后再试。"; 
+  
+                 console.error(error); 
+  
+             } finally { 
+  
+                 outputText.classList.remove('typing-cursor'); 
+  
+                 bottomNav.style.opacity = '1'; 
+  
+             } 
+  
+         } 
+  
+     </script></body></html>

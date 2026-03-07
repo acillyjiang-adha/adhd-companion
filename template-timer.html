@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template 02 - “时间看得见”指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+    <style>
+        @page { size: A4; margin: 0; }
+        body { font-family: "LXGW WenKai", sans-serif; background-color: #e5e5e5; display: flex; justify-content: center; padding: 2rem 0; }
+        .a4-paper { width: 210mm; height: 297mm; background-color: #FDFBF7; position: relative; overflow: hidden; box-sizing: border-box; padding: 16mm 15mm; display: flex; flex-direction: column; }
+        @media print {
+            body { background-color: #FDFBF7; padding: 0; }
+            .a4-paper { box-shadow: none; width: 100%; height: 100%; }
+            .no-print { display: none !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+        .timer-circle { width: 45px; height: 45px; border-radius: 50%; border: 2px dashed #E8B4BC; display: flex; align-items: center; justify-content: center; color: #E8B4BC; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="no-print fixed top-6 right-6 z-50">
+        <button onclick="window.print()" class="bg-[#E8B4BC] text-white px-6 py-3 rounded-full shadow-lg hover:-translate-y-1 transition-all flex items-center gap-2 text-sm tracking-widest">
+            <span>🖨️ 立即打印高清版</span>
+        </button>
+    </div>
+
+    <div class="a4-paper">
+        <div class="flex justify-between items-end mb-8 border-b-2 border-[#4A4A4A] pb-4">
+            <div>
+                <span class="text-[#E8B4BC] text-sm tracking-widest uppercase font-sans">Template 02 / Time Blindness Hack</span>
+                <h1 class="text-3xl text-[#4A4A4A] mt-2 tracking-wide font-medium">“时间看得见”指南与冲刺卡</h1>
+            </div>
+        </div>
+
+        <div class="bg-[#F2E2DF]/30 p-6 rounded-2xl border border-[#E8B4BC]/30 mb-8 text-[#5C5C5C] leading-loose">
+            <h3 class="text-[#E8B4BC] tracking-widest text-lg mb-3">✦ 为什么要用视觉计时器？</h3>
+            <p class="mb-2 text-justify">ADHD 大脑的时间感知像微弱的 WiFi 信号，“十分钟”对他们来说极其抽象 [cite: 3]。我们需要用视觉计时器（如 Time Timer 或沙漏），让时间的流逝变成<strong>“看得见、正在缩小的色块”</strong>，以此激活前额叶的紧迫感。</p>
+            <h3 class="text-[#E8B4BC] tracking-widest text-lg mt-6 mb-3">✦ “伪截止日期”游戏怎么玩？</h3>
+            <p class="text-justify">当孩子拒绝写作业时，不要说“快去写”。试着说：<strong>“你的大脑现在卡住了，我们来做个实验。把计时器拧到 10 分钟，这 10 分钟里你随便写几点，时间一到不管写没写完都立刻停笔休息。”</strong><br>这能极大地降低“完美主义”带来的启动焦虑。通常 10 分钟后，大脑引擎就已经成功点火了。</p>
+        </div>
+
+        <div class="flex-grow flex flex-col">
+            <h3 class="text-[#4A4A4A] tracking-widest text-xl mb-6 text-center">本周 10 分钟微冲刺记录</h3>
+            <p class="text-center text-[#888888] text-sm mb-8 tracking-widest">（每成功启动并坚持一个 10 分钟，请涂满一个小球）</p>
+            
+            <div class="grid grid-cols-5 gap-y-10 gap-x-6 px-10">
+                <script>
+                    for(let i=1; i<=20; i++) {
+                        document.write(`<div class="flex flex-col items-center gap-2">
+                            <div class="timer-circle font-sans">${i}</div>
+                        </div>`);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-6 border-t border-[#E1E8E0] text-center">
+            <p class="text-[#BDBDBD] tracking-widest text-sm">“专注不是逼出来的，是设计出来的。”</p>
+        </div>
+    </div>
+</body>
+</html>

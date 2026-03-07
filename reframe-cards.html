@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闪光时刻 - 治愈系卡片</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+    
+    <style>
+        body {
+            font-family: "LXGW WenKai", sans-serif;
+            background-color: #FDFBF7;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); /* 更轻柔丝滑的翻转 */
+        }
+        .backface-hidden { backface-visibility: hidden; }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        .card-back { transform: rotateY(180deg); }
+
+        /* 治愈系流光 */
+        .shimmer-effect { position: relative; overflow: hidden; }
+        .shimmer-effect::after {
+            content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-20deg); animation: shimmer 5s infinite;
+        }
+        @keyframes shimmer {
+            0% { left: -150%; }
+            50% { left: 200%; }
+            100% { left: 200%; }
+        }
+
+        /* 极柔和的弥散阴影 */
+        .card-shadow {
+            box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.06), 0 4px 12px -4px rgba(0, 0, 0, 0.03);
+        }
+        .card-back-shadow {
+            box-shadow: 0 12px 32px -12px rgba(168, 218, 220, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center py-12 px-4">
+
+    <div class="text-center mb-10">
+        <h2 class="text-2xl text-[#4A4A4A] mb-2 tracking-widest">微 光 瞬 间</h2>
+        <p class="text-[#BDBDBD] text-sm tracking-widest">左右滑动 · 轻轻点击</p>
+    </div>
+
+    <div class="w-full max-w-4xl flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-6 pb-12 px-6 sm:px-12 items-center">
+
+        <div class="card-container perspective-1000 w-72 h-[380px] shrink-0 snap-center cursor-pointer" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner transform-style-3d relative w-full h-full">
+                
+                <div class="card-front backface-hidden absolute inset-0 bg-white rounded-2xl p-7 flex flex-col card-shadow border border-[#F4F2EE]">
+                    <div class="flex justify-between items-start mb-auto">
+                        <span class="text-4xl text-[#E8B4BC] opacity-40 font-serif leading-none">“</span>
+                        <span class="text-[10px] text-[#A8C4A2] tracking-widest border border-[#A8C4A2]/30 bg-[#A8C4A2]/5 px-2 py-1 rounded-full">情绪重构</span>
+                    </div>
+                    
+                    <p class="text-[17px] text-[#5C5C5C] leading-loose tracking-wide mt-4 mb-auto text-justify">
+                        我觉得我不是个好母亲。
+                    </p>
+                    
+                    <div class="mt-auto flex justify-end">
+                        <span class="text-[11px] text-[#D4C9B3] tracking-widest animate-pulse flex items-center gap-1">
+                            翻转 <span>⤻</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-back backface-hidden absolute inset-0 bg-gradient-to-br from-[#A8DADC] to-[#9DCED0] rounded-2xl p-7 flex flex-col card-back-shadow shimmer-effect border border-[#A8DADC]/50">
+                    <div class="flex justify-start mb-auto">
+                        <span class="text-4xl text-white opacity-40 font-serif leading-none">”</span>
+                    </div>
+                    
+                    <p class="text-[16px] text-white leading-loose tracking-wide mt-2 mb-auto text-justify">
+                        这种内疚感，恰恰说明你有多爱他。
+                        <br><br>
+                        爱不是完美，<br>而是哪怕疲惫也依然在场。
+                    </p>
+                    
+                    <div class="mt-auto flex justify-end">
+                        <span class="text-[11px] text-white/70 tracking-widest">
+                            —— 心理咨询师
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container perspective-1000 w-72 h-[380px] shrink-0 snap-center cursor-pointer" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner transform-style-3d relative w-full h-full">
+                <div class="card-front backface-hidden absolute inset-0 bg-white rounded-2xl p-7 flex flex-col card-shadow border border-[#F4F2EE]">
+                    <div class="flex justify-between items-start mb-auto">
+                        <span class="text-4xl text-[#D4C9B3] opacity-40 font-serif leading-none">"</span>
+                        <span class="text-[10px] text-[#E8B4BC] tracking-widest border border-[#E8B4BC]/30 bg-[#E8B4BC]/5 px-2 py-1 rounded-full">系统 Bug</span>
+                    </div>
+                    <p class="text-[17px] text-[#5C5C5C] leading-loose tracking-wide mt-4 mb-auto text-justify">
+                        我刚跟他说完去拿本子，他转身就去玩玩具了，完全把我的话当耳旁风！
+                    </p>
+                    <div class="mt-auto flex justify-end">
+                        <span class="text-[11px] text-[#D4C9B3] tracking-widest animate-pulse flex items-center gap-1">翻转 <span>⤻</span></span>
+                    </div>
+                </div>
+                <div class="card-back backface-hidden absolute inset-0 bg-gradient-to-br from-[#A8DADC] to-[#9DCED0] rounded-2xl p-7 flex flex-col card-back-shadow shimmer-effect border border-[#A8DADC]/50">
+                    <div class="flex justify-start mb-auto">
+                        <span class="text-4xl text-white opacity-40 font-serif leading-none">"</span>
+                    </div>
+                    <p class="text-[16px] text-white leading-loose tracking-wide mt-2 mb-auto text-justify">
+                        这是工作记忆系统的‘系统 bug’，绝不是态度问题。他的大脑容量就像个小杯子，被新玩具一刺激，你的指令就溢出去了。接受‘提醒十次是正常操作’，这不是你的失败。
+                    </p>
+                    <div class="mt-auto flex justify-end">
+                        <span class="text-[11px] text-white/70 tracking-widest">—— 神经科学视角</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container perspective-1000 w-72 h-[380px] shrink-0 snap-center cursor-pointer" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner transform-style-3d relative w-full h-full">
+                <div class="card-front backface-hidden absolute inset-0 bg-white rounded-2xl p-7 flex flex-col card-shadow border border-[#F4F2EE]">
+                    <div class="flex justify-between items-start mb-auto">
+                        <span class="text-4xl text-[#A8C4A2] opacity-40 font-serif leading-none">“</span>
+                        <span class="text-[10px] text-[#D4C9B3] tracking-widest border border-[#D4C9B3]/40 bg-[#D4C9B3]/10 px-2 py-1 rounded-full">自我关怀</span>
+                    </div>
+                    <p class="text-[17px] text-[#5C5C5C] leading-loose tracking-wide mt-4 mb-auto text-justify">
+                        我今天实在受不了，自己锁在厕所里躲了十分钟。
+                    </p>
+                    <div class="mt-auto flex justify-end">
+                        <span class="text-[11px] text-[#D4C9B3] tracking-widest animate-pulse flex items-center gap-1">翻转 <span>⤻</span></span>
+                    </div>
+                </div>
+                <div class="card-back backface-hidden absolute inset-0 bg-gradient-to-br from-[#A8DADC] to-[#9DCED0] rounded-2xl p-7 flex flex-col card-back-shadow shimmer-effect border border-[#A8DADC]/50">
+                    <div class="flex justify-start mb-auto">
+                        <span class="text-4xl text-white opacity-40 font-serif leading-none">”</span>
+                    </div>
+                    <p class="text-[16px] text-white leading-loose tracking-wide mt-2 mb-auto text-justify">
+                        今天你先活着，明天我们再谈成长。这十分钟的‘战略性撤退’，不仅保护了你，也给孩子示范了如何在情绪高压下踩刹车。你做得非常对。
+                    </p>
+                    <div class="mt-auto flex justify-end">
+                        <span class="text-[11px] text-white/70 tracking-widest">—— 懂你的回音</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

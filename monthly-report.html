@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月度微光报告 - ADHD守护</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        body {
+            background-color: #EFECE6; /* 极浅的暖灰背景，烘托报告的纸质感 */
+            font-family: "LXGW WenKai", sans-serif;
+            color: #4A4A4A;
+        }
+        
+        /* 报告本体的纸质投影 */
+        .paper-shadow {
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), 0 0 10px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 强调文字的下划线高亮 */
+        .highlight-text {
+            background: linear-gradient(180deg, transparent 65%, rgba(168, 218, 220, 0.4) 0);
+            display: inline;
+        }
+
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4 sm:px-6">
+
+    <div id="report-content" class="w-full max-w-xl bg-[#FDFBF7] rounded-3xl p-8 sm:p-12 paper-shadow relative overflow-hidden">
+        
+        <div class="absolute top-0 right-0 w-64 h-64 bg-[#E8B4BC] rounded-full mix-blend-multiply filter blur-3xl opacity-10 transform translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#A8DADC] rounded-full mix-blend-multiply filter blur-3xl opacity-10 transform -translate-x-1/2 translate-y-1/2"></div>
+
+        <div class="text-center mt-6 mb-16 relative z-10">
+            <p class="text-[#888888] tracking-widest text-sm mb-6">November 2026</p>
+            <h1 class="text-2xl sm:text-3xl leading-relaxed mb-8 font-medium">
+                嘿，这是你与内心对话的<br>第 <span class="text-[#E8B4BC] text-4xl mx-1">30</span> 天。
+            </h1>
+            <p class="text-[#5C5C5C] leading-loose tracking-wide text-justify sm:text-center text-lg">
+                这个月，你一共存下了 42 个情绪碎片。<br>
+                在那些你觉得快要撑不下去的时刻，<br>
+                <span class="highlight-text">你其实都稳稳地接住了自己。</span>
+            </p>
+        </div>
+
+        <div class="flex justify-center items-center space-x-4 mb-14 opacity-50">
+            <div class="w-12 h-px bg-[#D4C9B3]"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-[#D4C9B3]"></div>
+            <div class="w-12 h-px bg-[#D4C9B3]"></div>
+        </div>
+
+        <div class="mb-16 relative z-10">
+            <h2 class="text-xl text-center tracking-widest text-[#8BA88E] mb-8">The Hidden Progress<br><span class="text-sm text-[#888888] mt-1 block">被时光掩藏的微光时刻</span></h2>
+            
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-[#F4F2EE] shadow-sm">
+                    <p class="text-[#888888] text-sm mb-3">11月12日，你说：</p>
+                    <p class="text-lg leading-relaxed mb-4">"他把牛奶打翻了，但我今天忍住没吼他，只是让他自己去拿抹布。"</p>
+                    <div class="bg-[#FAF9F5] p-5 rounded-xl border-l-4 border-[#D4C9B3]">
+                        <p class="text-[#5C5C5C] leading-relaxed text-sm">
+                            <strong class="text-[#8BA88E]">微光回信：</strong>这就是最高级的自控力。你为孩子示范了如何在混乱中保持情绪稳定，这比任何言语说教都更有力量。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-[#F4F2EE] shadow-sm">
+                    <p class="text-[#888888] text-sm mb-3">11月18日，你说：</p>
+                    <p class="text-lg leading-relaxed mb-4">“他虽然还是哭了，但他用了我教的词语说‘我有点烦’，而不是直接摔门。”</p>
+                    <div class="bg-[#F4F7F4] p-5 rounded-xl border-l-4 border-[#8BA88E]">
+                        <p class="text-[#5C5C5C] leading-relaxed text-sm">
+                            <strong class="text-[#8BA88E]">微光回信：</strong>他正在用笨拙的方式努力搭建沟通的桥梁，而你是那个耐心递砖块的人。这是自我调节能力的巨大跨越。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-16 relative z-10">
+            <h2 class="text-xl text-center tracking-widest text-[#E8B4BC] mb-8">The Compass<br><span class="text-sm text-[#888888] mt-1 block">下个月的避雷指南</span></h2>
+            
+            <div class="bg-[#FAF9F5] p-8 rounded-3xl border border-[#F4F2EE]">
+                <ul class="space-y-8 text-[#5C5C5C] leading-loose text-[17px] tracking-wide">
+                    <li class="flex items-start">
+                        <span class="mr-3 mt-1 text-[#E8B4BC]">✦</span>
+                        <p>下个月如果再次感到"脑子乱"，试着去用你本月最有效的办法——给自己买杯温热的奶茶，<strong>照顾好自己，是最好的教养。</strong></p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-3 mt-1 text-[#E8B4BC]">✦</span>
+                        <p>如果孩子再次失控，记得你 15 号写下的那句话：<span class="highlight-text">"这只是大脑在发烧"</span>，别让它烧到你的心情。</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="text-center mt-20 mb-6 relative z-10">
+            <p class="text-xl leading-loose tracking-wide text-[#4A4A4A]">
+                亲爱的，你已经做得很好了，<br>比你想象中还要好。
+            </p>
+            <p class="text-sm text-[#BDBDBD] tracking-widest mt-8">
+                [ 下个月，我们继续同行 ]
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-8 mb-12">
+        <button onclick="exportReport()" class="bg-[#8BA88E] text-white px-8 py-3.5 rounded-full font-medium tracking-widest hover:-translate-y-1 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300 flex items-center space-x-2">
+            <span>⬇ 存入相册，作为本月勋章</span>
+        </button>
+    </div>
+
+    <script>
+        function exportReport() {
+            const reportElement = document.getElementById('report-content');
+            const btn = document.querySelector('button');
+            
+            // 按钮状态变为"生成中"
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<span>✨ 正在生成这封情书...</span>";
+            btn.classList.add('opacity-70');
+
+            // 使用 html2canvas 将 div 渲染为图片
+            html2canvas(reportElement, {
+                scale: 2, // 提高清晰度
+                backgroundColor: '#FDFBF7', // 确保背景色渲染正确
+                useCORS: true // 允许加载外部字体
+            }).then(canvas => {
+                // 创建下载链接
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = '我的微光报告_11月.png';
+                link.href = image;
+                link.click();
+
+                // 恢复按钮状态
+                btn.innerHTML = originalText;
+                btn.classList.remove('opacity-70');
+            }).catch(err => {
+                console.error("生成图片失败:", err);
+                btn.innerHTML = "<span>生成失败，请稍后再试</span>";
+                setTimeout(() => { btn.innerHTML = originalText; btn.classList.remove('opacity-70'); }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

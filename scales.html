@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自测量表 - ADHD 家长支持</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'paper': '#FDFBF7',
+                        'ink': '#3C3C3C',
+                        'light-gray': '#888888',
+                        'sage': '#8BA88E',
+                        'sage-dark': '#7A967D',
+                    },
+                    fontFamily: {
+                        'serif': ['"Noto Serif SC"', 'serif'],
+                        'sans': ['"Noto Sans SC"', 'sans-serif'],
+                    },
+                    letterSpacing: {
+                        'wide': '0.05em',
+                        'wider': '0.1em',
+                    },
+                    boxShadow: {
+                        'lg-sage': '0 10px 15px -3px rgba(139, 168, 142, 0.1), 0 4px 6px -2px rgba(139, 168, 142, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .scale-card {
+            background-color: white;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease-in-out;
+        }
+        .scale-card:hover {
+            transform: translateY(-4px);
+            border-color: #8BA88E;
+            box-shadow: 0 4px 20px rgba(139, 168, 142, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-paper text-ink font-sans">
+
+    <!-- Header -->
+    <header class="py-6 px-8 md:px-16 flex justify-between items-center border-b border-gray-200">
+        <a href="/index.html" class="font-serif text-xl font-bold tracking-wider">Sanctuary</a>
+        <nav>
+            <a href="#" class="text-light-gray hover:text-ink transition-colors duration-300">登录</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-16 md:py-24 px-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h1 class="font-serif text-4xl md:text-5xl font-bold leading-tight mb-4">
+                    自 我 评 估 工 具
+                </h1>
+                <p class="max-w-2xl mx-auto text-lg text-light-gray">
+                    这些量表是经过科学验证的筛查工具，旨在帮助您更好地理解自己或孩子的行为模式。它们不能替代专业诊断。
+                </p>
+            </div>
+
+            <!-- Scales Grid -->
+            <div class="grid md:grid-cols-1 gap-8">
+                
+                <!-- ASRS-6 Card -->
+                <a href="/asrs.html" class="block p-8 rounded-2xl scale-card">
+                    <h3 class="font-serif text-2xl font-bold text-ink mb-2">成人ADHD自测 (ASRS-6)</h3>
+                    <p class="text-light-gray mb-4">由世界卫生组织推荐的6题快速筛查工具，用于评估成人注意力缺陷/多动障碍的症状。</p>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="px-3 py-1 text-xs font-medium text-sage bg-sage/10 rounded-full">18岁以上成人</span>
+                        <span class="text-xs text-light-gray/70">© NYU & Harvard College</span>
+                    </div>
+                </a>
+
+                <!-- Vanderbilt Card -->
+                <a href="#" class="block p-8 rounded-2xl scale-card">
+                    <h3 class="font-serif text-2xl font-bold text-ink mb-2">儿童ADHD家长评估 (Vanderbilt)</h3>
+                    <p class="text-light-gray mb-4">由家长填写，用于评估6-12岁儿童的行为及表现，是儿科医生常用的评估工具之一。</p>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="px-3 py-1 text-xs font-medium text-sage bg-sage/10 rounded-full">6-12岁儿童家长</span>
+                        <span class="text-xs text-light-gray/70">NICHQ, Public Domain</span>
+                    </div>
+                </a>
+
+                <!-- SNAP-IV Card -->
+                <a href="#" class="block p-8 rounded-2xl scale-card">
+                    <h3 class="font-serif text-2xl font-bold text-ink mb-2">儿童症状筛查 (SNAP-IV)</h3>
+                    <p class="text-light-gray mb-4">一个更全面的筛查工具，不仅包含ADHD症状，还涵盖了对立违抗障碍(ODD)的相关症状。</p>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="px-3 py-1 text-xs font-medium text-sage bg-sage/10 rounded-full">6-18岁儿童家长</span>
+                        <span class="text-xs text-light-gray/70">Public Domain</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 px-8 text-center border-t border-gray-200 mt-16">
+        <p class="text-xs text-light-gray">&copy; 2026 Sanctuary. All Rights Reserved. <a href="#" class="hover:text-ink">隐私政策</a> | <a href="#" class="hover:text-ink">服务条款</a></p>
+        <p class="text-xs text-light-gray mt-2">免责声明：本工具旨在提供情绪支持，不能替代专业医疗诊断。如有需要，请咨询专业医生。</p>
+    </footer>
+
+</body>
+</html>

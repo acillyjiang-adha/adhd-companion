@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实用工具箱与家校联盟 - ADHD守护</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        body {
+            font-family: "LXGW WenKai", sans-serif;
+            background-color: #FDFBF7;
+            color: #4A4A4A;
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 自定义输入框获取焦点时的底色微变 */
+        input:focus, textarea:focus {
+            background-color: #FDFBF7;
+        }
+        
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="min-h-screen py-12 px-4 sm:px-6 flex flex-col items-center">
+
+    <header class="w-full max-w-4xl flex justify-between items-center mb-16">
+        <div class="text-xl font-medium tracking-wide text-[#8BA88E]">ADHD 守护</div>
+        <a href="index.html" class="text-sm text-[#888888] hover:text-[#8BA88E] transition-colors">返回首页</a>
+    </header>
+
+    <div class="max-w-4xl w-full text-center mb-16">
+        <h1 class="text-3xl font-medium mb-4 text-[#4A4A4A]">执行力外挂与家校同盟</h1>
+        <p class="text-[#888888] tracking-wide leading-relaxed">
+            把大脑做不到的事，交给环境。<br>在这里下载你的物理外挂，或者生成一份专业的家校沟通档案。
+        </p>
+    </div>
+
+    <div class="max-w-4xl w-full mb-24">
+        <div class="flex items-center mb-8">
+            <span class="text-2xl text-[#E8B4BC] mr-3">✦</span>
+            <h2 class="text-2xl font-medium text-[#4A4A4A]">打印工具箱</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div class="bg-white rounded-3xl p-8 card-shadow border border-[#F4F2EE] flex flex-col h-full hover:-translate-y-1 transition-transform relative overflow-hidden group">
+                 <div class="absolute top-0 left-0 w-full h-1 bg-[#8BA88E] opacity-40 group-hover:opacity-100 transition-opacity"></div>
+                 
+                 <span class="text-[#BDBDBD] text-xs tracking-widest mb-4 font-sans uppercase">Template 01</span>
+                 <h3 class="text-xl font-medium mb-3 text-[#4A4A4A] tracking-wide">“一天通关”日程表</h3>
+                 <p class="text-[#888888] text-[15px] leading-relaxed mb-10 flex-grow text-justify">
+                     将抽象的时间化为具体的路线图。留白设计，让你和孩子共同填涂每日通关任务。
+                 </p>
+                 <button onclick="window.open('template-schedule.html', '_blank')" class="w-full py-3 rounded-full border border-[#8BA88E]/50 text-[#8BA88E] text-sm tracking-widest hover:bg-[#8BA88E] hover:text-white hover:border-[#8BA88E] transition-all">
+                     获取 A4 打印版
+                 </button>
+             </div>
+ 
+             <div class="bg-white rounded-3xl p-8 card-shadow border border-[#F4F2EE] flex flex-col h-full hover:-translate-y-1 transition-transform relative overflow-hidden group">
+                 <div class="absolute top-0 left-0 w-full h-1 bg-[#E8B4BC] opacity-40 group-hover:opacity-100 transition-opacity"></div>
+                 
+                 <span class="text-[#BDBDBD] text-xs tracking-widest mb-4 font-sans uppercase">Template 02</span>
+                 <h3 class="text-xl font-medium mb-3 text-[#4A4A4A] tracking-wide">“时间看得见”指南</h3>
+                 <p class="text-[#888888] text-[15px] leading-relaxed mb-10 flex-grow text-justify">
+                     教你如何使用视觉计时器，配合“10分钟能做多少”的伪截止日期游戏，破解启动困难。
+                 </p>
+                 <button onclick="window.open('template-timer.html', '_blank')" class="w-full py-3 rounded-full border border-[#E8B4BC]/50 text-[#E8B4BC] text-sm tracking-widest hover:bg-[#E8B4BC] hover:text-white hover:border-[#E8B4BC] transition-all">
+                     获取 A4 打印版
+                 </button>
+             </div>
+ 
+             <div class="bg-white rounded-3xl p-8 card-shadow border border-[#F4F2EE] flex flex-col h-full hover:-translate-y-1 transition-transform relative overflow-hidden group">
+                 <div class="absolute top-0 left-0 w-full h-1 bg-[#D4C9B3] opacity-40 group-hover:opacity-100 transition-opacity"></div>
+                 
+                 <span class="text-[#BDBDBD] text-xs tracking-widest mb-4 font-sans uppercase">Template 03</span>
+                 <h3 class="text-xl font-medium mb-3 text-[#4A4A4A] tracking-wide">“比昨天好”代币图</h3>
+                 <p class="text-[#888888] text-[15px] leading-relaxed mb-10 flex-grow text-justify">
+                     不是为了完美，而是记录进步。每次微小的正向行为，都可以涂色一块拼图。
+                 </p>
+                 <button onclick="window.open('template-tracker.html', '_blank')" class="w-full py-3 rounded-full border border-[#D4C9B3]/60 text-[#D4C9B3] text-sm tracking-widest hover:bg-[#D4C9B3] hover:text-white hover:border-[#D4C9B3] transition-all">
+                     获取 A4 打印版
+                 </button>
+             </div>
+         </div>
+    </div>
+
+    <div class="w-full max-w-4xl flex justify-center items-center space-x-4 mb-24 opacity-40">
+        <div class="w-16 h-px bg-[#D4C9B3]"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-[#D4C9B3]"></div>
+        <div class="w-16 h-px bg-[#D4C9B3]"></div>
+    </div>
+
+    <div class="max-w-4xl w-full mb-12">
+        <div class="flex items-center mb-8">
+            <span class="text-2xl text-[#8BA88E] mr-3">✦</span>
+            <h2 class="text-2xl font-medium text-[#4A4A4A]">家校联盟一页纸档案</h2>
+        </div>
+        <p class="text-[#888888] text-sm leading-relaxed mb-8">
+            不要带着指责或抱歉走向老师。用这份神经科学视角的档案，将老师从“对立面”拉入“合作阵营”。
+        </p>
+
+        <div class="bg-white rounded-3xl p-8 sm:p-10 card-shadow border border-[#F4F2EE] mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm text-[#888888] mb-2 tracking-widest">称呼与基本信息</label>
+                    <input type="text" id="childInfo" value="致王老师：我是浩浩的妈妈" class="w-full bg-[#FAF9F5] border-none rounded-xl px-4 py-3 text-[#4A4A4A] focus:ring-2 focus:ring-[#8BA88E]/30 outline-none">
+                </div>
+
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm text-[#8BA88E] mb-2 tracking-widest">1. 看见闪光点 (我的优势)</label>
+                    <textarea id="strengths" rows="2" class="w-full bg-[#F4F7F4] border-none rounded-xl px-4 py-3 text-[#4A4A4A] leading-relaxed focus:ring-2 focus:ring-[#8BA88E]/30 outline-none resize-none">他充满热情，对感兴趣的科学实验极其专注，思维非常跳跃和有创造力。</textarea>
+                </div>
+
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm text-[#E8B4BC] mb-2 tracking-widest">2. 我的“使用说明书” (核心挑战的神经科学视角)</label>
+                    <textarea id="challenges" rows="3" class="w-full bg-[#F2E2DF]/30 border-none rounded-xl px-4 py-3 text-[#4A4A4A] leading-relaxed focus:ring-2 focus:ring-[#E8B4BC]/30 outline-none resize-none">他的前额叶发育和工作记忆容量仍在成长中。他有时并非不听话，而是多步指令容易“掉线”；在嘈杂环境中，他容易感官过载而显得烦躁。</textarea>
+                </div>
+
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm text-[#D4C9B3] mb-2 tracking-widest">3. 合作说明 (对我最有效的策略)</label>
+                    <textarea id="strategies" rows="3" class="w-full bg-[#FAF9F5] border-none rounded-xl px-4 py-3 text-[#4A4A4A] leading-relaxed focus:ring-2 focus:ring-[#D4C9B3]/50 outline-none resize-none">1. 将长指令拆解为单步指令。
+2. 当他坐不住时，如果条件允许，请允许他站着听课几分钟，这能帮他大脑保持清醒。
+3. 一个温和的眼神提醒，比当众批评更能让他快速配合。</textarea>
+                </div>
+
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm text-[#888888] mb-2 tracking-widest">4. 排雷指南 (请尽量避免的触发点)</label>
+                    <textarea id="avoids" rows="2" class="w-full bg-[#F4F2EE] border-none rounded-xl px-4 py-3 text-[#4A4A4A] leading-relaxed focus:ring-2 focus:ring-[#BDBDBD]/50 outline-none resize-none">请尽量不要用“剥夺体育课或课间休息”作为惩罚，因为运动是他大脑稳定情绪的燃料。</textarea>
+                </div>
+            </div>
+
+            <div class="mt-10 flex justify-end">
+                <button onclick="generateLetter()" class="bg-[#8BA88E] text-white px-8 py-3.5 rounded-full font-medium tracking-wide hover:-translate-y-1 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300">
+                    预览并生成专业档案
+                </button>
+            </div>
+        </div>
+
+        <div id="previewArea" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-medium text-[#4A4A4A]">预览效果</h3>
+                <button onclick="downloadLetter()" id="downloadBtn" class="text-sm px-5 py-2 rounded-full border border-[#8BA88E] text-[#8BA88E] hover:bg-[#8BA88E] hover:text-white transition-colors">
+                    ⬇ 存为图片发送给老师
+                </button>
+            </div>
+            
+            <div id="letterContent" class="bg-[#FDFBF7] p-10 sm:p-14 rounded-2xl card-shadow border border-[#E1E8E0] relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-40 h-40 bg-[#E8B4BC] rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+                
+                <h2 id="outInfo" class="text-xl font-medium mb-10 text-[#4A4A4A]"></h2>
+                
+                <p class="text-[#5C5C5C] leading-loose mb-8 text-[17px] text-justify">
+                    非常感谢您这段时间对孩子的包容与教导。为了协助您更好地理解和引导他，我们基于专业评估整理了这份<strong class="text-[#8BA88E] font-normal border-b border-[#8BA88E]/30">“神经学视角的个人说明书”</strong>，希望能为您日常的班级管理减少一些阻力。
+                </p>
+
+                <div class="space-y-8">
+                    <div>
+                        <h4 class="text-[#8BA88E] tracking-widest text-sm mb-3">✦ 他的闪光点</h4>
+                        <p id="outStrengths" class="text-[#5C5C5C] leading-loose bg-white p-5 rounded-xl border border-[#F4F7F4]"></p>
+                    </div>
+                    <div>
+                        <h4 class="text-[#E8B4BC] tracking-widest text-sm mb-3">✦ 核心挑战的神经学视角</h4>
+                        <p id="outChallenges" class="text-[#5C5C5C] leading-loose bg-white p-5 rounded-xl border border-[#F2E2DF]/50"></p>
+                    </div>
+                    <div>
+                        <h4 class="text-[#D4C9B3] tracking-widest text-sm mb-3">✦ 对他最有效的策略支持</h4>
+                        <p id="outStrategies" class="text-[#5C5C5C] leading-loose bg-white p-5 rounded-xl border border-[#FAF9F5] whitespace-pre-line"></p>
+                    </div>
+                    <div>
+                        <h4 class="text-[#888888] tracking-widest text-sm mb-3">✦ 恳请避免的触发点</h4>
+                        <p id="outAvoids" class="text-[#5C5C5C] leading-loose bg-white p-5 rounded-xl border border-[#F4F2EE]"></p>
+                    </div>
+                </div>
+
+                <p class="text-[#888888] text-sm mt-12 text-center tracking-widest">
+                    我们非常期待与您建立紧密的家校同盟。<br>如果他在校有任何进步或需要配合的地方，请随时联系我们。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateLetter() {
+            // 获取输入值
+            document.getElementById('outInfo').innerText = document.getElementById('childInfo').value;
+            document.getElementById('outStrengths').innerText = document.getElementById('strengths').value;
+            document.getElementById('outChallenges').innerText = document.getElementById('challenges').value;
+            document.getElementById('outStrategies').innerText = document.getElementById('strategies').value;
+            document.getElementById('outAvoids').innerText = document.getElementById('avoids').value;
+
+            // 显示预览区
+            const previewArea = document.getElementById('previewArea');
+            previewArea.classList.remove('hidden');
+            
+            // 平滑滚动到预览区
+            previewArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function downloadLetter() {
+            const letterElement = document.getElementById('letterContent');
+            const btn = document.getElementById('downloadBtn');
+            const originalText = btn.innerText;
+            
+            btn.innerText = "生成中...";
+            btn.classList.add('opacity-50', 'pointer-events-none');
+
+            html2canvas(letterElement, {
+                scale: 2,
+                backgroundColor: '#FDFBF7',
+                useCORS: true
+            }).then(canvas => {
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = '家校联盟档案.png';
+                link.href = image;
+                link.click();
+
+                btn.innerText = originalText;
+                btn.classList.remove('opacity-50', 'pointer-events-none');
+            }).catch(err => {
+                console.error("生成图片失败:", err);
+                btn.innerText = "生成失败";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
