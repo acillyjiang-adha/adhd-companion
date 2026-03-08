@@ -201,6 +201,14 @@
             }, 3000);
 
             try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBcWZVUgSw0BJBxCWU0XOA_5HZAW1dzX6I",
+                    authDomain: "adha-b3b4d.firebaseapp.com",
+                    projectId: "adha-b3b4d",
+                    storageBucket: "adha-b3b4d.appspot.com",
+                    messagingSenderId: "120170656643",
+                    appId: "1:120170656643:web:195e4bf6b8a7eac502bcb6"
+                };
                 firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
