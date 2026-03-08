@@ -1,14 +1,17 @@
-<!DOCTYPE html><html lang="zh-CN"><head> 
-  
-     <meta charset="UTF-8"> 
-  
-     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  
-     <title>静音 - ADHD守护</title> 
-  
-     <script src="https://cdn.tailwindcss.com"></script> 
-  
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" /> 
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADHD 守护</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="./firebase-config.js" type="module"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" /> 
   
      <style> 
   
@@ -121,6 +124,27 @@
          ::-webkit-scrollbar { display: none; } 
   
      </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
+    <!-- 登录/用户信息区域 -->
+    <div id="auth-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; z-index: 10;">
+        <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录 / 我的档案</button>
+        <div id="userInfo" class="hidden items-center gap-4">
+            <span id="userEmailDisplay" class="text-[#333]"></span>
+            <button id="logoutBtn" class="text-[#d93025]">退出</button>
+        </div>
+    </div>
+
+    <!-- 登录弹窗 -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96 text-center">
+            <h2 class="text-xl font-medium mb-4">开启您的专属档案</h2>
+            <p class="text-sm text-[#888] mb-6">为了保存您的“微光卡片”并生成专属分析，请使用邮箱一键登录（您的数据绝对私密）。</p>
+            <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4 text-center">
+            <div class="flex justify-center gap-4 mt-2">
+                <button onclick="handleLogin()" class="bg-[#8BA88E] text-white px-6 py-2 rounded-lg hover:opacity-90">发送登录链接</button>
+                <button onclick="closeLoginModal()" class="text-[#888]">稍后</button>
+            </div>
+        </div>
+    </div>
     <!-- 登录/用户信息区域 -->
     <div style="position: absolute; top: 20px; right: 20px; font-size: 14px;">
         <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录</button>
@@ -266,13 +290,21 @@
               
   
              <div class="mt-8 text-center opacity-0 transition-opacity duration-1000" id="bottomNav"> 
+                 <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">试试这些工具</a> 
+             </div> 
   
-                 <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1"> 
-  
-                     试试这些工具 
-  
-                 </a> 
-  
+             <!-- 登录后可见的功能区域 --> 
+             <div id="historySection" class="hidden mt-12 w-full max-w-2xl text-center"> 
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6"> 
+                     <div id="myCardsBtn" class="bg-white/50 p-6 rounded-lg cursor-pointer hover:bg-white transition-all"> 
+                         <h3 class="font-medium">我的微光卡片</h3> 
+                         <p class="text-sm text-[#888] mt-2">回顾每一次的倾诉与重构</p> 
+                     </div> 
+                     <div id="monthlyAnalysisBtn" class="bg-white/50 p-6 rounded-lg cursor-pointer hover:bg-white transition-all"> 
+                         <h3 class="font-medium">生成本月微光分析</h3> 
+                         <p class="text-sm text-[#888] mt-2">查看您的情绪曲线与成长</p> 
+                     </div> 
+                 </div> 
              </div> 
   
          </div> 
@@ -281,7 +313,135 @@
   
   
   
-     <script type="module">
+         <script type="module">
+        // 从配置文件导入 Firebase 服务
+        import { auth, db } from './firebase-config.js';
+
+        let currentUser = null;
+
+        // --- 核心鉴权逻辑 ---
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            updateUIForUser(user);
+            handleSignInRedirect();
+        });
+
+        // 处理邮件链接登录
+        function handleSignInRedirect() {
+            if (auth.isSignInWithEmailLink(window.location.href) && !currentUser) {
+                let email = window.localStorage.getItem('emailForSignIn');
+                if (!email) {
+                    email = window.prompt('为了完成登录，请输入您的邮箱：');
+                }
+                auth.signInWithEmailLink(email, window.location.href)
+                    .then(() => {
+                        window.localStorage.removeItem('emailForSignIn');
+                    })
+                    .catch(error => {
+                        alert('登录失败: ' + error.message);
+                    });
+            }
+        }
+
+        // 根据用户登录状态更新UI
+        function updateUIForUser(user) {
+            const loginBtn = document.getElementById('loginBtn');
+            const userInfo = document.getElementById('userInfo');
+            const userEmailDisplay = document.getElementById('userEmailDisplay');
+            const historySection = document.getElementById('historySection'); // 假设的历史记录区域
+
+            if (user) {
+                loginBtn.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                userEmailDisplay.textContent = user.email.split('@')[0]; // 显示邮箱前缀
+                historySection.classList.remove('hidden');
+            } else {
+                loginBtn.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+                historySection.classList.add('hidden');
+            }
+        }
+
+        // --- 弹窗与登录处理 ---
+        const loginModal = document.getElementById('loginModal');
+        window.openLoginModal = () => loginModal.classList.remove('hidden');
+        window.closeLoginModal = () => loginModal.classList.add('hidden');
+
+        window.handleLogin = () => {
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput.value;
+            if (!email) { alert('请输入邮箱'); return; }
+
+            const actionCodeSettings = {
+                url: window.location.href, // 登录后返回当前页面
+                handleCodeInApp: true,
+            };
+
+            auth.sendSignInLinkToEmail(email, actionCodeSettings)
+                .then(() => {
+                    window.localStorage.setItem('emailForSignIn', email);
+                    alert('验证链接已发送至您的邮箱，请查收并点击链接完成登录！');
+                    emailInput.value = '';
+                    closeLoginModal();
+                })
+                .catch(error => {
+                    alert('发送失败: ' + error.message);
+                });
+        };
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // --- 页面访问拦截 ---
+        document.getElementById('monthlyAnalysisBtn').addEventListener('click', () => {
+            if (!currentUser) {
+                openLoginModal();
+            } else {
+                window.location.href = '/monthly-report.html'; // 跳转到分析页面
+            }
+        });
+
+        document.getElementById('myCardsBtn').addEventListener('click', () => {
+            if (!currentUser) {
+                openLoginModal();
+            } else {
+                window.location.href = '/cards.html'; // 跳转到卡片历史页面
+            }
+        });
+
+        // --- 原有的核心逻辑（AI对话、UI动画等）---
+        // ... (我们之前的代码，如 startAIAnalysis, fetchDeepSeek 等将放在这里)
+
+        // 在 fetchDeepSeek 成功获取回复后，增加 Firestore 写入逻辑
+        async function saveInteraction(originalText, reframeText) {
+            if (!currentUser) return; // 未登录则不保存
+
+            try {
+                await db.collection('interactions').add({
+                    uid: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    original_text: originalText,
+                    reframe_text: reframeText,
+                    // emotion_tag: '待实现' // 情绪标签功能后续添加
+                });
+            } catch (error) {
+                console.error(" Firestore 写入失败: ", error);
+            }
+        }
+
+        // 修改 fetchDeepSeek，在拿到回复后调用保存函数
+        async function fetchDeepSeek(text) {
+            // ... (原有的 fetch 逻辑)
+            // 假设拿到回复后
+            const replyText = "这是AI的回复示例"; // 伪代码
+            outputText.innerHTML = replyText;
+
+            // 调用保存函数
+            await saveInteraction(text, replyText);
+        }
+
+    </script>
          import { supabase } from './supabaseClient.js';
 
          // ... (我们原有的所有JS代码将放在这里)
