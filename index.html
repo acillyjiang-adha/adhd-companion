@@ -126,7 +126,7 @@
      </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
     <!-- 统一的、由JS动态渲染的用户状态容器 -->
     <div id="auth-status-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; color: #888; z-index: 10;">
-        <!-- 内容将由 onAuthStateChanged 动态注入 -->
+        加载中...
     </div>
 
     <!-- 登录弹窗 -->
@@ -334,11 +334,18 @@
         const bottomNav = document.getElementById('bottomNav');
 
         // --- 核心鉴权逻辑 ---
-        auth.onAuthStateChanged(user => {
-            currentUser = user;
-            updateUIForUser(user);
-            handleSignInRedirect();
-        });
+        // 确保 Firebase SDK 加载完成后再监听状态
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                updateUIForUser(user);
+                handleSignInRedirect();
+            });
+        } else {
+            console.error('Firebase SDK 未正确加载');
+            // 显示错误状态
+            updateUIForUser(null);
+        }
 
         function handleSignInRedirect() {
             if (auth.isSignInWithEmailLink(window.location.href) && !currentUser) {
@@ -354,13 +361,14 @@
 
         function updateUIForUser(user) {
             const container = document.getElementById('auth-status-container');
+            if (!container) return; // 确保容器存在
             container.innerHTML = ''; // 彻底清空，防止重影
 
             if (user) {
                 // 已登录状态：显示下拉菜单
                 container.innerHTML = `
                     <div class="relative" id="user-menu-container">
-                        <button id="userMenuBtn" class="cursor-pointer">我的记录 (已登录)</button>
+                        <button id="userMenuBtn" class="cursor-pointer">我的记录</button>
                         <div id="userMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20">
                             <a href="/cards.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">查看历史记录</a>
                             <button id="logoutBtnInsideMenu" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">退出登录</button>
@@ -371,14 +379,20 @@
                 // 为下拉菜单添加交互逻辑
                 const menuBtn = document.getElementById('userMenuBtn');
                 const dropdown = document.getElementById('userMenuDropdown');
-                menuBtn.addEventListener('click', () => dropdown.classList.toggle('hidden'));
-                document.getElementById('logoutBtnInsideMenu').addEventListener('click', () => auth.signOut());
+                if (menuBtn && dropdown) {
+                    menuBtn.addEventListener('click', () => dropdown.classList.toggle('hidden'));
+                    const logoutBtnInsideMenu = document.getElementById('logoutBtnInsideMenu');
+                    if (logoutBtnInsideMenu) {
+                        logoutBtnInsideMenu.addEventListener('click', () => auth.signOut());
+                    }
+                }
 
                 // 点击菜单外部关闭菜单
                 document.addEventListener('click', (event) => {
-                    const container = document.getElementById('user-menu-container');
-                    if (container && !container.contains(event.target)) {
-                        dropdown.classList.add('hidden');
+                    const menuContainer = document.getElementById('user-menu-container');
+                    if (menuContainer && !menuContainer.contains(event.target)) {
+                        const dropdown = document.getElementById('userMenuDropdown');
+                        if (dropdown) dropdown.classList.add('hidden');
                     }
                 });
 
