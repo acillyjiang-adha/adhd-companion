@@ -126,7 +126,7 @@
      </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
     <!-- 登录/用户信息区域 -->
     <div id="auth-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; z-index: 10;">
-        <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录 / 我的档案</button>
+        <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录 / 我的记录</button>
         <div id="userInfo" class="hidden items-center gap-4">
             <span id="userEmailDisplay" class="text-[#333]"></span>
             <button id="logoutBtn" class="text-[#d93025]">退出</button>
@@ -136,7 +136,7 @@
     <!-- 登录弹窗 -->
     <div id="loginModal" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-lg shadow-xl w-96 text-center">
-            <h2 class="text-xl font-medium mb-4">开启您的专属档案</h2>
+            <h2 class="text-xl font-medium mb-4">开启您的专属记录</h2>
             <p class="text-sm text-[#888] mb-6">为了保存您的“微光卡片”并生成专属分析，请使用邮箱一键登录（您的数据绝对私密）。</p>
             <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4 text-center">
             <div class="flex justify-center gap-4 mt-2">
