@@ -516,11 +516,11 @@
 
         function transformStage() {
             welcome.classList.add('hidden-collapse');
-            input.disabled = true;
+            // input.disabled = true; // 交给 startAIAnalysis 函数管理
             mainContainer.classList.remove('mt-auto', 'mb-auto');
             mainContainer.classList.add('mt-12');
-            submitArea.style.opacity = '0';
-            setTimeout(() => submitArea.style.display = 'none', 1000);
+            // submitArea.style.opacity = '0'; // 不再由这里隐藏
+            // setTimeout(() => submitArea.style.display = 'none', 1000); // 不再由这里隐藏
             responseContainer.classList.add('expanded');
         }
 
@@ -541,19 +541,23 @@
             const submitBtn = document.querySelector('button[onclick="startAIAnalysis()"]');
             const originalText = submitBtn.innerHTML;
 
-            submitBtn.innerHTML = "微光正在汇聚，请稍候(约10-15秒)...";
+            // 1. 发送请求前：改变按钮文字并禁用按钮
+            submitBtn.innerHTML = "微光正在汇聚...";
             submitBtn.disabled = true;
-            submitBtn.style.opacity = "0.7";
+            input.disabled = true;
 
             try {
+                // 转换UI，但不隐藏提交按钮
                 transformStage();
                 responseLabel.classList.remove('hidden');
+                outputText.innerHTML = ''; // 清空旧回复
                 outputText.classList.add('typing-cursor');
                 await fetchDeepSeek(userText);
             } finally {
+                // 2. 请求结束后：恢复按钮和输入框状态
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                submitBtn.style.opacity = "1";
+                input.disabled = false;
             }
         }
 
