@@ -458,7 +458,11 @@
             }
         };
 
-        logoutBtn.addEventListener('click', () => auth.signOut());
+        // 修复：只有在 logoutBtn 存在时才添加事件监听器
+        const logoutBtnElement = document.getElementById('logoutBtn');
+        if (logoutBtnElement) {
+            logoutBtnElement.addEventListener('click', () => auth.signOut());
+        }
 
         // --- 页面访问拦截 ---
         monthlyAnalysisBtn.addEventListener('click', () => {
@@ -660,8 +664,8 @@
             } finally {
                 outputText.classList.remove('typing-cursor');
                 // 不再恢复旧按钮，而是显示新的操作按钮
-                const actionNav = document.getElementById('actionNav');
-                if(actionNav) actionNav.style.opacity = '1';
+                // const actionNav = document.getElementById('actionNav');
+                // if(actionNav) actionNav.style.opacity = '1';
             }
         }
 
