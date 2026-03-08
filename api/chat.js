@@ -16,7 +16,7 @@ export default async function handler(req) {
         const deepseekRequestBody = {
             ...incomingBody,
             model: "deepseek-chat", // 确保模型参数存在
-            stream: true // 确保开启流式输出
+            stream: false // 【关键】关闭流式输出！
         };
 
         // 带着隐藏的 API Key，去请求真实的 DeepSeek 服务器
@@ -30,14 +30,13 @@ export default async function handler(req) {
             body: JSON.stringify(deepseekRequestBody)
         });
 
-        // 原封不动地把 DeepSeek 返回的“流式数据”管子，直接怼回给前端
-        return new Response(response.body, {
-            status: response.status,
-            headers: {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            }
+        // 直接等待 DeepSeek 的完整回复
+        const data = await response.json();
+
+        // 将完整的 JSON 回复直接返回给前端
+        return new Response(JSON.stringify(data), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
         });
 
     } catch (error) {
