@@ -124,13 +124,9 @@
          ::-webkit-scrollbar { display: none; } 
   
      </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
-    <!-- 统一的用户入口 -->
-    <div id="auth-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; z-index: 10;">
-        <button id="userEntryBtn" class="text-[#888] hover:text-[#333] transition-colors">我的记录</button>
-        <div id="userInfo" class="hidden items-center gap-4">
-            <span id="userEmailDisplay" class="text-[#333]"></span>
-            <button id="logoutBtn" class="text-[#d93025]">退出</button>
-        </div>
+    <!-- 统一的、由JS动态渲染的用户状态容器 -->
+    <div id="auth-status-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; color: #888; z-index: 10;">
+        <!-- 内容将由 onAuthStateChanged 动态注入 -->
     </div>
 
     <!-- 登录弹窗 -->
@@ -369,15 +365,38 @@
         }
 
         function updateUIForUser(user) {
+            const container = document.getElementById('auth-status-container');
+            container.innerHTML = ''; // 彻底清空，防止重影
+
             if (user) {
-                userEntryBtn.style.display = 'none'; // 隐藏“我的记录”按钮
-                userInfo.style.display = 'flex'; // 显示用户信息和退出按钮
-                userEmailDisplay.textContent = user.email.split('@')[0];
-                historySection.style.display = 'block';
+                // 已登录状态：显示下拉菜单
+                container.innerHTML = `
+                    <div class="relative" id="user-menu-container">
+                        <button id="userMenuBtn" class="cursor-pointer">我的记录 (已登录)</button>
+                        <div id="userMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20">
+                            <a href="/cards.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">查看历史记录</a>
+                            <button id="logoutBtnInsideMenu" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">退出登录</button>
+                        </div>
+                    </div>
+                `;
+
+                // 为下拉菜单添加交互逻辑
+                const menuBtn = document.getElementById('userMenuBtn');
+                const dropdown = document.getElementById('userMenuDropdown');
+                menuBtn.addEventListener('click', () => dropdown.classList.toggle('hidden'));
+                document.getElementById('logoutBtnInsideMenu').addEventListener('click', () => auth.signOut());
+
+                // 点击菜单外部关闭菜单
+                document.addEventListener('click', (event) => {
+                    const container = document.getElementById('user-menu-container');
+                    if (container && !container.contains(event.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+
             } else {
-                userEntryBtn.style.display = 'block'; // 显示“我的记录”按钮
-                userInfo.style.display = 'none'; // 隐藏用户信息
-                historySection.style.display = 'none';
+                // 未登录状态：显示登录按钮
+                container.innerHTML = '<button onclick="openLoginModal()" class="cursor-pointer">我的记录</button>';
             }
         }
 
