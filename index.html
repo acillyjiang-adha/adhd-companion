@@ -429,12 +429,14 @@
             try {
                 if (authMode === 'login') {
                     await auth.signInWithEmailAndPassword(email, password);
+                    console.log("登录成功！");
                 } else {
                     if (password.length < 6) {
                         alert('为了您的账户安全，密码至少需要6位。');
                         return;
                     }
                     await auth.createUserWithEmailAndPassword(email, password);
+                    console.log("注册成功！");
                 }
                 closeLoginModal();
             } catch (error) {
