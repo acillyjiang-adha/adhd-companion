@@ -149,27 +149,9 @@
             <p class="text-xs text-gray-400 mt-6 text-center">您的数据经过加密存储，仅用于为您生成个人微光档案，我们不会向任何第三方透露您的信息。</p>
         </div>
     </div>
-    <!-- 登录/用户信息区域 -->
-    <div style="position: absolute; top: 20px; right: 20px; font-size: 14px;">
-        <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录</button>
-        <div id="authSection" class="hidden">
-            <span id="userEmail" class="text-[#333]"></span>
-            <button id="logoutBtn" class="ml-4 text-[#d93025]">退出</button>
-        </div>
-    </div>
 
-    <!-- 登录弹窗 -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
-            <h2 class="text-xl font-medium mb-4">开启您的专属档案</h2>
-            <p class="text-sm text-[#888] mb-6">为了替您生成专属的月末微光分析，我们需要为您建立一个加密的情绪档案。请使用邮箱一键开启（您的数据绝对私密）。</p>
-            <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4">
-            <div class="flex justify-end gap-4">
-                <button onclick="closeLoginModal()" class="text-[#888]">取消</button>
-                <button onclick="handleLogin()" class="bg-[#8BA88E] text-white px-6 py-2 rounded-lg">发送登录链接</button>
-            </div>
-        </div>
-    </div> 
+
+ 
   
       
   
@@ -293,9 +275,15 @@
   
               
   
-             <div class="mt-8 text-center opacity-0 transition-opacity duration-1000" id="bottomNav"> 
-                 <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">试试这些工具</a> 
-             </div> 
+             <div id="bottomNav" class="mt-8 text-center opacity-0 transition-opacity duration-1000">
+            <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">试试这些工具</a>
+        </div>
+
+        <!-- AI 回复后的操作按钮 -->
+        <div id="actionNav" class="mt-8 text-center opacity-0 transition-opacity duration-1000 flex gap-6">
+            <button onclick="saveToCards()" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">存为卡片</button>
+            <button onclick="window.location.reload()" class="text-xs text-[#888] tracking-widest hover:text-[#4A4A4A] transition-colors">再聊一次</button>
+        </div> 
   
              <!-- 登录后可见的功能区域 --> 
              <div id="historySection" class="hidden mt-12 w-full max-w-2xl text-center"> 
@@ -400,15 +388,6 @@
             }
         }
 
-        // 为统一的入口按钮添加点击事件
-        userEntryBtn.addEventListener('click', () => {
-            if (!currentUser) {
-                openLoginModal(); // 未登录，打开登录框
-            }
-            // 如果已登录，此按钮被隐藏，所以无需处理点击事件
-        });
-
-        // --- 弹窗与登录处理 ---
         const loginModal = document.getElementById('loginModal');
         let authMode = 'login'; // 'login' or 'register'
 
@@ -561,15 +540,31 @@
             }
         }
 
+        window.saveToCards = function() {
+            if (!currentUser) {
+                openLoginModal(); // 未登录，引导登录
+            } else {
+                // 这里我们假设AI回复已经完成，并且数据已经存在于变量中
+                const originalText = input.value.trim();
+                const reframeText = outputText.innerHTML;
+                // 注意：emotionTag 需要在 fetchDeepSeek 中被保存到一个全局变量中才能在这里访问
+                saveInteraction(originalText, reframeText, window.latestEmotionTag);
+                alert('已为您存为微光卡片。');
+            }
+        }
+
         // --- AI 对话与数据存储 ---
-        async function saveInteraction(originalText, reframeText) {
-            if (!currentUser) return;
+        async function saveInteraction(originalText, reframeText, emotionData) {
+            if (!currentUser) return; // 未登录，静默返回
+
             try {
                 await db.collection('interactions').add({
                     uid: currentUser.uid,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     original_text: originalText,
                     reframe_text: reframeText,
+                    emotion_label: emotionData ? emotionData.label : '未知',
+                    emotion_color: emotionData ? emotionData.color : '#888888',
                 });
             } catch (error) {
                 console.error("Firestore 写入失败: ", error);
@@ -633,17 +628,40 @@
                 if (!response.ok) throw new Error('网络请求失败');
 
                 const data = await response.json();
-                const replyText = data.choices[0].message.content;
+                let rawReply = data.choices[0].message.content;
 
-                outputText.innerHTML = replyText;
-                await saveInteraction(text, replyText);
+                let emotionTag = null;
+                const tagRegex = /\s*\[EMOTION_TAG: (\{.*?\})\]/;
+                const match = rawReply.match(tagRegex);
+
+                if (match && match[1]) {
+                    try {
+                        emotionTag = JSON.parse(match[1]);
+                        window.latestEmotionTag = emotionTag; // 保存到全局变量
+                        // 从UI上彻底删除技术标签
+                        rawReply = rawReply.replace(tagRegex, '').trim();
+                    } catch (e) {
+                        console.error("情绪标签解析失败: ", e);
+                        window.latestEmotionTag = null;
+                    }
+                } else {
+                    window.latestEmotionTag = null;
+                }
+
+                // 渲染干净的回复到页面
+                outputText.innerHTML = rawReply;
+                
+                // 将解析出的数据传递给存储函数
+                await saveInteraction(text, rawReply, emotionTag);
 
             } catch (error) {
                 outputText.innerHTML = "抱歉，微光暂时未能照达。请检查网络连接或稍后再试。";
                 console.error(error);
             } finally {
                 outputText.classList.remove('typing-cursor');
-                bottomNav.style.opacity = '1';
+                // 不再恢复旧按钮，而是显示新的操作按钮
+                const actionNav = document.getElementById('actionNav');
+                if(actionNav) actionNav.style.opacity = '1';
             }
         }
 
