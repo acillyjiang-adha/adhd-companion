@@ -135,14 +135,22 @@
 
     <!-- 登录弹窗 -->
     <div id="loginModal" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-96 text-center">
-            <h2 class="text-xl font-medium mb-4">开启您的专属记录</h2>
-            <p class="text-sm text-[#888] mb-6">为了保存您的“微光卡片”并生成专属分析，请使用邮箱一键登录（您的数据绝对私密）。</p>
-            <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4 text-center">
-            <div class="flex justify-center gap-4 mt-2">
-                <button onclick="handleLogin()" class="bg-[#8BA88E] text-white px-6 py-2 rounded-lg hover:opacity-90">发送登录链接</button>
-                <button onclick="closeLoginModal()" class="text-[#888]">稍后</button>
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <!-- 登录/注册切换 -->
+            <div class="flex border-b mb-6">
+                <button id="loginTab" class="flex-1 py-2 font-medium border-b-2 border-[#8BA88E] text-[#8BA88E]" onclick="setAuthMode('login')">登录</button>
+                <button id="registerTab" class="flex-1 py-2 font-medium text-gray-500" onclick="setAuthMode('register')">注册</button>
             </div>
+
+            <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4">
+            <input id="passwordInput" type="password" placeholder="请输入密码（至少6位）" class="w-full border p-2 rounded mb-4">
+            
+            <div class="flex justify-end gap-4 mt-4">
+                <button onclick="closeLoginModal()" class="text-[#888]">取消</button>
+                <button id="authActionBtn" onclick="handleAuthAction()" class="bg-[#8BA88E] text-white px-6 py-2 rounded-lg">登录</button>
+            </div>
+
+            <p class="text-xs text-gray-400 mt-6 text-center">您的数据经过加密存储，仅用于为您生成个人微光档案，我们不会向任何第三方透露您的信息。</p>
         </div>
     </div>
     <!-- 登录/用户信息区域 -->
@@ -374,24 +382,72 @@
         }
 
         // --- 弹窗与登录处理 ---
+        const loginModal = document.getElementById('loginModal');
+        let authMode = 'login'; // 'login' or 'register'
+
         window.openLoginModal = () => loginModal.classList.remove('hidden');
         window.closeLoginModal = () => loginModal.classList.add('hidden');
 
-        window.handleLogin = () => {
-            const emailInput = document.getElementById('emailInput');
-            const email = emailInput.value;
-            if (!email) { alert('请输入邮箱'); return; }
+        window.setAuthMode = (mode) => {
+            authMode = mode;
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const authActionBtn = document.getElementById('authActionBtn');
 
-            const actionCodeSettings = { url: window.location.href, handleCodeInApp: true };
+            if (mode === 'login') {
+                loginTab.classList.add('border-[#8BA88E]', 'text-[#8BA88E]');
+                loginTab.classList.remove('text-gray-500');
+                registerTab.classList.remove('border-[#8BA88E]', 'text-[#8BA88E]');
+                registerTab.classList.add('text-gray-500');
+                authActionBtn.textContent = '登录';
+            } else {
+                registerTab.classList.add('border-[#8BA88E]', 'text-[#8BA88E]');
+                registerTab.classList.remove('text-gray-500');
+                loginTab.classList.remove('border-[#8BA88E]', 'text-[#8BA88E]');
+                loginTab.classList.add('text-gray-500');
+                authActionBtn.textContent = '注册';
+            }
+        };
 
-            auth.sendSignInLinkToEmail(email, actionCodeSettings)
-                .then(() => {
-                    window.localStorage.setItem('emailForSignIn', email);
-                    alert('验证链接已发送至您的邮箱，请查收并点击链接完成登录！');
-                    emailInput.value = '';
-                    closeLoginModal();
-                })
-                .catch(error => alert('发送失败: ' + error.message));
+        window.handleAuthAction = async () => {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!email || !password) {
+                alert('邮箱和密码不能为空。');
+                return;
+            }
+
+            try {
+                if (authMode === 'login') {
+                    await auth.signInWithEmailAndPassword(email, password);
+                } else {
+                    if (password.length < 6) {
+                        alert('为了您的账户安全，密码至少需要6位。');
+                        return;
+                    }
+                    await auth.createUserWithEmailAndPassword(email, password);
+                }
+                closeLoginModal();
+            } catch (error) {
+                // 温柔的中文错误提示
+                let message = '操作失败，请稍后再试。';
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        message = '这个邮箱还没有注册过，要不要切换到注册试试？';
+                        break;
+                    case 'auth/wrong-password':
+                        message = '密码好像输错了，要不要再仔细检查一下？';
+                        break;
+                    case 'auth/email-already-in-use':
+                        message = '这个邮箱已经被注册啦，直接登录吧！';
+                        break;
+                    case 'auth/weak-password':
+                        message = '为了您的账户安全，密码至少需要6位哦。';
+                        break;
+                }
+                alert(message);
+            }
         };
 
         logoutBtn.addEventListener('click', () => auth.signOut());
