@@ -3,10 +3,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADHD 守护</title>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Firebase SDK (v9 Compat Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script src="./firebase-config.js" type="module"></script>
 
@@ -124,9 +124,9 @@
          ::-webkit-scrollbar { display: none; } 
   
      </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
-    <!-- 登录/用户信息区域 -->
+    <!-- 统一的用户入口 -->
     <div id="auth-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; z-index: 10;">
-        <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录 / 我的记录</button>
+        <button id="userEntryBtn" class="text-[#888] hover:text-[#333] transition-colors">我的记录</button>
         <div id="userInfo" class="hidden items-center gap-4">
             <span id="userEmailDisplay" class="text-[#333]"></span>
             <button id="logoutBtn" class="text-[#d93025]">退出</button>
@@ -329,7 +329,7 @@
         let currentUser = null;
 
         // --- DOM 元素获取 ---
-        const loginBtn = document.getElementById('loginBtn');
+        const userEntryBtn = document.getElementById('userEntryBtn');
         const userInfo = document.getElementById('userInfo');
         const userEmailDisplay = document.getElementById('userEmailDisplay');
         const logoutBtn = document.getElementById('logoutBtn');
@@ -370,16 +370,24 @@
 
         function updateUIForUser(user) {
             if (user) {
-                loginBtn.classList.add('hidden');
-                userInfo.classList.remove('hidden');
+                userEntryBtn.style.display = 'none'; // 隐藏“我的记录”按钮
+                userInfo.style.display = 'flex'; // 显示用户信息和退出按钮
                 userEmailDisplay.textContent = user.email.split('@')[0];
-                historySection.classList.remove('hidden');
+                historySection.style.display = 'block';
             } else {
-                loginBtn.classList.remove('hidden');
-                userInfo.classList.add('hidden');
-                historySection.classList.add('hidden');
+                userEntryBtn.style.display = 'block'; // 显示“我的记录”按钮
+                userInfo.style.display = 'none'; // 隐藏用户信息
+                historySection.style.display = 'none';
             }
         }
+
+        // 为统一的入口按钮添加点击事件
+        userEntryBtn.addEventListener('click', () => {
+            if (!currentUser) {
+                openLoginModal(); // 未登录，打开登录框
+            }
+            // 如果已登录，此按钮被隐藏，所以无需处理点击事件
+        });
 
         // --- 弹窗与登录处理 ---
         const loginModal = document.getElementById('loginModal');
