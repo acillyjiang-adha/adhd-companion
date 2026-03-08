@@ -1,21 +1,23 @@
 // firebase-config.js
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// TODO: 请在这里填入您从 Firebase 控制台获取的 firebaseConfig 对象
-// 这是一个示例，请务必替换成您自己的真实配置！
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:000000000000000000"
+  apiKey: "AIzaSyBcWZVUgSw0BJBxCWU0XOA_5HZAW1dzX6I",
+  authDomain: "adha-b3b4d.firebaseapp.com",
+  projectId: "adha-b3b4d",
+  storageBucket: "adha-b3b4d.appspot.com",
+  messagingSenderId: "120170656643",
+  appId: "1:120170656643:web:195e4bf6b8a7eac502bcb6"
 };
 
-// 初始化 Firebase App
-const app = firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-// 导出我们需要用到的 Firebase 服务
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Export the necessary services
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 export { app, auth, db };
