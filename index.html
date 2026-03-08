@@ -317,7 +317,29 @@
         // 从配置文件导入 Firebase 服务
         import { auth, db } from './firebase-config.js';
 
+        // --- 全局变量 ---
         let currentUser = null;
+
+        // --- DOM 元素获取 ---
+        const loginBtn = document.getElementById('loginBtn');
+        const userInfo = document.getElementById('userInfo');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginModal = document.getElementById('loginModal');
+        const historySection = document.getElementById('historySection');
+        const monthlyAnalysisBtn = document.getElementById('monthlyAnalysisBtn');
+        const myCardsBtn = document.getElementById('myCardsBtn');
+        const modal = document.getElementById('onboardingModal');
+        const modalCard = document.getElementById('modalCard');
+        const input = document.getElementById('diaryInput');
+        const welcome = document.getElementById('welcomeText');
+        const submitArea = document.getElementById('submitArea');
+        const responseContainer = document.getElementById('responseContainer');
+        const responseBox = document.getElementById('responseBox');
+        const responseLabel = document.getElementById('responseLabel');
+        const outputText = document.getElementById('outputText');
+        const mainContainer = document.getElementById('mainContainer');
+        const bottomNav = document.getElementById('bottomNav');
 
         // --- 核心鉴权逻辑 ---
         auth.onAuthStateChanged(user => {
@@ -326,7 +348,6 @@
             handleSignInRedirect();
         });
 
-        // 处理邮件链接登录
         function handleSignInRedirect() {
             if (auth.isSignInWithEmailLink(window.location.href) && !currentUser) {
                 let email = window.localStorage.getItem('emailForSignIn');
@@ -334,26 +355,16 @@
                     email = window.prompt('为了完成登录，请输入您的邮箱：');
                 }
                 auth.signInWithEmailLink(email, window.location.href)
-                    .then(() => {
-                        window.localStorage.removeItem('emailForSignIn');
-                    })
-                    .catch(error => {
-                        alert('登录失败: ' + error.message);
-                    });
+                    .then(() => window.localStorage.removeItem('emailForSignIn'))
+                    .catch(error => alert('登录失败: ' + error.message));
             }
         }
 
-        // 根据用户登录状态更新UI
         function updateUIForUser(user) {
-            const loginBtn = document.getElementById('loginBtn');
-            const userInfo = document.getElementById('userInfo');
-            const userEmailDisplay = document.getElementById('userEmailDisplay');
-            const historySection = document.getElementById('historySection'); // 假设的历史记录区域
-
             if (user) {
                 loginBtn.classList.add('hidden');
                 userInfo.classList.remove('hidden');
-                userEmailDisplay.textContent = user.email.split('@')[0]; // 显示邮箱前缀
+                userEmailDisplay.textContent = user.email.split('@')[0];
                 historySection.classList.remove('hidden');
             } else {
                 loginBtn.classList.remove('hidden');
@@ -363,7 +374,6 @@
         }
 
         // --- 弹窗与登录处理 ---
-        const loginModal = document.getElementById('loginModal');
         window.openLoginModal = () => loginModal.classList.remove('hidden');
         window.closeLoginModal = () => loginModal.classList.add('hidden');
 
@@ -372,10 +382,7 @@
             const email = emailInput.value;
             if (!email) { alert('请输入邮箱'); return; }
 
-            const actionCodeSettings = {
-                url: window.location.href, // 登录后返回当前页面
-                handleCodeInApp: true,
-            };
+            const actionCodeSettings = { url: window.location.href, handleCodeInApp: true };
 
             auth.sendSignInLinkToEmail(email, actionCodeSettings)
                 .then(() => {
@@ -384,301 +391,108 @@
                     emailInput.value = '';
                     closeLoginModal();
                 })
-                .catch(error => {
-                    alert('发送失败: ' + error.message);
-                });
+                .catch(error => alert('发送失败: ' + error.message));
         };
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            auth.signOut();
-        });
+        logoutBtn.addEventListener('click', () => auth.signOut());
 
         // --- 页面访问拦截 ---
-        document.getElementById('monthlyAnalysisBtn').addEventListener('click', () => {
-            if (!currentUser) {
-                openLoginModal();
-            } else {
-                window.location.href = '/monthly-report.html'; // 跳转到分析页面
-            }
+        monthlyAnalysisBtn.addEventListener('click', () => {
+            if (!currentUser) openLoginModal();
+            else window.location.href = '/monthly-report.html';
         });
 
-        document.getElementById('myCardsBtn').addEventListener('click', () => {
-            if (!currentUser) {
-                openLoginModal();
-            } else {
-                window.location.href = '/cards.html'; // 跳转到卡片历史页面
-            }
+        myCardsBtn.addEventListener('click', () => {
+            if (!currentUser) openLoginModal();
+            else window.location.href = '/cards.html';
         });
 
-        // --- 原有的核心逻辑（AI对话、UI动画等）---
-        // ... (我们之前的代码，如 startAIAnalysis, fetchDeepSeek 等将放在这里)
+        // --- 页面加载与交互逻辑 ---
+        window.onload = () => {
+            const childName = localStorage.getItem('adhd_child_name');
+            if(!childName) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalCard.classList.remove('translate-y-4');
+            }
+        };
 
-        // 在 fetchDeepSeek 成功获取回复后，增加 Firestore 写入逻辑
+        window.saveProfile = function() {
+            const name = document.getElementById('childName').value.trim() || '孩子';
+            const trait = document.getElementById('childTrait').value.trim() || '活跃';
+            localStorage.setItem('adhd_child_name', name);
+            localStorage.setItem('adhd_child_trait', trait);
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalCard.classList.add('translate-y-4');
+        }
+
+        input.addEventListener('focus', () => welcome.classList.add('dimmed'));
+        input.addEventListener('blur', () => { if(input.value.trim() === '') welcome.classList.remove('dimmed'); });
+        input.addEventListener('input', () => { submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0'; });
+
+        function transformStage() {
+            welcome.classList.add('hidden-collapse');
+            input.disabled = true;
+            mainContainer.classList.remove('mt-auto', 'mb-auto');
+            mainContainer.classList.add('mt-12');
+            submitArea.style.opacity = '0';
+            setTimeout(() => submitArea.style.display = 'none', 1000);
+            responseContainer.classList.add('expanded');
+        }
+
+        window.saveSilently = function() {
+            if(!input.value.trim()) return;
+            transformStage();
+            responseBox.classList.replace('border-[#E1E8E0]', 'border-[#F4F2EE]');
+            responseBox.classList.replace('bg-white', 'bg-[#FAF9F5]');
+            outputText.classList.add('text-center', 'text-[#888888]', 'tracking-widest');
+            outputText.innerHTML = "情绪已安放。<br>没有评判，只有接纳。";
+            setTimeout(() => bottomNav.style.opacity = '1', 800);
+        }
+
+        window.startAIAnalysis = async function() {
+            const userText = input.value.trim();
+            if(!userText) return;
+
+            const submitBtn = document.querySelector('button[onclick="startAIAnalysis()"]');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = "微光正在汇聚，请稍候(约10-15秒)...";
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.7";
+
+            try {
+                transformStage();
+                responseLabel.classList.remove('hidden');
+                outputText.classList.add('typing-cursor');
+                await fetchDeepSeek(userText);
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+            }
+        }
+
+        // --- AI 对话与数据存储 ---
         async function saveInteraction(originalText, reframeText) {
-            if (!currentUser) return; // 未登录则不保存
-
+            if (!currentUser) return;
             try {
                 await db.collection('interactions').add({
                     uid: currentUser.uid,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     original_text: originalText,
                     reframe_text: reframeText,
-                    // emotion_tag: '待实现' // 情绪标签功能后续添加
                 });
             } catch (error) {
-                console.error(" Firestore 写入失败: ", error);
+                console.error("Firestore 写入失败: ", error);
             }
         }
 
-        // 修改 fetchDeepSeek，在拿到回复后调用保存函数
         async function fetchDeepSeek(text) {
-            // ... (原有的 fetch 逻辑)
-            // 假设拿到回复后
-            const replyText = "这是AI的回复示例"; // 伪代码
-            outputText.innerHTML = replyText;
+            const API_URL = "/api/chat";
+            const childName = localStorage.getItem('adhd_child_name') || '孩子';
+            const childTrait = localStorage.getItem('adhd_child_trait') || '';
 
-            // 调用保存函数
-            await saveInteraction(text, replyText);
-        }
-
-    </script>
-         import { supabase } from './supabaseClient.js';
-
-         // ... (我们原有的所有JS代码将放在这里)
-
-         // --- 4. 用户认证与UI更新 ---
-         const authSection = document.getElementById('authSection');
-         const userEmailSpan = document.getElementById('userEmail');
-         const loginBtn = document.getElementById('loginBtn');
-         const logoutBtn = document.getElementById('logoutBtn');
-         const loginModal = document.getElementById('loginModal');
-
-         // 检查当前用户状态并更新UI
-         async function checkUser() {
-             const { data: { user } } = await supabase.auth.getUser();
-             if (user) {
-                 authSection.classList.remove('hidden');
-                 userEmailSpan.textContent = user.email;
-                 loginBtn.classList.add('hidden');
-                 // 在这里可以添加逻辑，显示需要登录才能看到的内容
-             } else {
-                 logoutBtn.classList.add('hidden');
-             }
-         }
-
-         // 打开登录弹窗
-         window.openLoginModal = function() {
-             loginModal.classList.remove('hidden');
-         }
-
-         // 关闭登录弹窗
-         window.closeLoginModal = function() {
-             loginModal.classList.add('hidden');
-         }
-
-         // 处理Magic Link登录
-         window.handleLogin = async function() {
-             const email = document.getElementById('emailInput').value;
-             if (!email) {
-                 alert('请输入您的邮箱');
-                 return;
-             }
-             try {
-                 const { error } = await supabase.auth.signInWithOtp({
-                     email: email,
-                 });
-                 if (error) throw error;
-                 alert('请检查您的邮箱，点击收到的链接即可登录！');
-                 closeLoginModal();
-             } catch (error) {
-                 alert('登录失败: ' + error.message);
-             }
-         }
-
-         // 处理登出
-         logoutBtn.addEventListener('click', async () => {
-             await supabase.auth.signOut();
-             window.location.reload(); // 刷新页面以更新UI
-         });
-
-         // 页面加载时检查用户状态
-         document.addEventListener('DOMContentLoaded', checkUser);
-
-     </script> 
-  
-         // --- 1. 弹窗与档案管理逻辑 --- 
-  
-         const modal = document.getElementById('onboardingModal'); 
-  
-         const modalCard = document.getElementById('modalCard'); 
-  
-          
-  
-         // 页面加载时检查是否有档案 
-  
-         window.onload = () => { 
-  
-             const childName = localStorage.getItem('adhd_child_name'); 
-  
-             if(!childName) { 
-  
-                 // 如果没有名字，显示弹窗 
-  
-                 modal.classList.remove('opacity-0', 'pointer-events-none'); 
-  
-                 modalCard.classList.remove('translate-y-4'); 
-  
-             } 
-  
-         }; 
-  
-  
-  
-         // 保存档案并关闭弹窗 
-  
-         function saveProfile() { 
-  
-             const name = document.getElementById('childName').value.trim() || '孩子'; 
-  
-             const trait = document.getElementById('childTrait').value.trim() || '活跃'; 
-  
-              
-  
-             localStorage.setItem('adhd_child_name', name); 
-  
-             localStorage.setItem('adhd_child_trait', trait); 
-  
-              
-  
-             // 优雅地隐藏弹窗 
-  
-             modal.classList.add('opacity-0', 'pointer-events-none'); 
-  
-             modalCard.classList.add('translate-y-4'); 
-  
-         } 
-  
-  
-  
-  
-  
-         // --- 2. 页面交互逻辑 --- 
-  
-         const input = document.getElementById('diaryInput'); 
-  
-         const welcome = document.getElementById('welcomeText'); 
-  
-         const submitArea = document.getElementById('submitArea'); 
-  
-         const responseContainer = document.getElementById('responseContainer'); 
-  
-         const responseBox = document.getElementById('responseBox'); 
-  
-         const responseLabel = document.getElementById('responseLabel'); 
-  
-         const outputText = document.getElementById('outputText'); 
-  
-         const mainContainer = document.getElementById('mainContainer'); 
-  
-         const bottomNav = document.getElementById('bottomNav'); 
-  
-  
-  
-         input.addEventListener('focus', () => welcome.classList.add('dimmed')); 
-  
-         input.addEventListener('blur', () => { if(input.value.trim() === '') welcome.classList.remove('dimmed'); }); 
-  
-         input.addEventListener('input', () => { submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0'; }); 
-  
-  
-  
-         function transformStage() { 
-  
-             welcome.classList.add('hidden-collapse'); 
-  
-             input.disabled = true; 
-  
-             mainContainer.classList.remove('mt-auto', 'mb-auto');  
-  
-             mainContainer.classList.add('mt-12');  
-  
-             submitArea.style.opacity = '0'; 
-  
-             setTimeout(() => submitArea.style.display = 'none', 1000); 
-  
-             responseContainer.classList.add('expanded'); 
-  
-         } 
-  
-  
-  
-         function saveSilently() { 
-  
-             if(!input.value.trim()) return; 
-  
-             transformStage(); 
-  
-             responseBox.classList.replace('border-[#E1E8E0]', 'border-[#F4F2EE]'); 
-  
-             responseBox.classList.replace('bg-white', 'bg-[#FAF9F5]'); 
-  
-             outputText.classList.add('text-center', 'text-[#888888]', 'tracking-widest'); 
-  
-             outputText.innerHTML = "情绪已安放。<br>没有评判，只有接纳。"; 
-  
-             setTimeout(() => bottomNav.style.opacity = '1', 800); 
-  
-         } 
-  
-  
-  
-         async function startAIAnalysis() {
-             const userText = input.value.trim();
-             if(!userText) return;
-
-             const submitBtn = document.querySelector('button[onclick="startAIAnalysis()"]');
-             const originalText = submitBtn.innerHTML;
-
-             // 1. 发送请求前：改变按钮文字并禁用按钮
-             submitBtn.innerHTML = "微光正在汇聚，请稍候(约10-15秒)...";
-             submitBtn.disabled = true;
-             submitBtn.style.opacity = "0.7";
-
-             try {
-                 transformStage();
-                 responseLabel.classList.remove('hidden');
-                 outputText.classList.add('typing-cursor');
-                 await fetchDeepSeek(userText);
-             } finally {
-                 // 2. 请求结束后（无论成功失败）：把按钮恢复原状
-                 submitBtn.innerHTML = originalText;
-                 submitBtn.disabled = false;
-                 submitBtn.style.opacity = "1";
-             }
-         }
-  
-  
-  
-  
-  
-         // --- 3. 连接 DeepSeek 的核心逻辑 ---
-
-        async function fetchDeepSeek(text) {
-
-            // 使用安全的后端代理，无需在前端暴露API密钥
-            const API_URL = "/api/chat"; 
-  
-  
-  
-             // 从本地提取刚才填写的孩子档案，让 AI 回复更专属 
-  
-             const childName = localStorage.getItem('adhd_child_name') || '孩子'; 
-  
-             const childTrait = localStorage.getItem('adhd_child_trait') || ''; 
-  
-  
-  
-             const systemPrompt = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。 
+            const systemPrompt = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。 
  
  孩子叫“${childName}”，特质是“${childTrait}”。 
  
@@ -710,59 +524,38 @@
  
  【常规核心干预逻辑——平时遵循】 
  
- （...这里保留我们刚才定好的4段逻辑...）`; 
-  
-  
-  
-             try { 
+ （...这里保留我们刚才定好的4段逻辑...）`;
 
-                const response = await fetch(API_URL, { 
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        temperature: 0.5,
+                        frequency_penalty: 0,
+                        presence_penalty: 0,
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: text }
+                        ]
+                    })
+                });
 
-                    method: "POST", 
+                if (!response.ok) throw new Error('网络请求失败');
 
-                    headers: { 
+                const data = await response.json();
+                const replyText = data.choices[0].message.content;
 
-                        "Content-Type": "application/json"
+                outputText.innerHTML = replyText;
+                await saveInteraction(text, replyText);
 
-                    }, 
+            } catch (error) {
+                outputText.innerHTML = "抱歉，微光暂时未能照达。请检查网络连接或稍后再试。";
+                console.error(error);
+            } finally {
+                outputText.classList.remove('typing-cursor');
+                bottomNav.style.opacity = '1';
+            }
+        }
 
-                    body: JSON.stringify({ 
-                         temperature: 0.5, // 稳定情绪 
-                         frequency_penalty: 0, // 【绝对关键】把频率惩罚关到0，让它敢于用常用词！ 
-                         presence_penalty: 0,  // 【绝对关键】把存在惩罚关到0！ 
-                         messages: [ 
-                             { role: "system", content: systemPrompt }, 
-                             { role: "user", content: text } 
-                         ] 
-                     }) 
-
-                }); 
-  
-  
-  
-                 if (!response.ok) throw new Error('网络请求失败');
-
-                 // 一次性接收完整的 JSON 回复
-                 const data = await response.json();
-                 const replyText = data.choices[0].message.content;
-
-                 // 直接把整段文字显示到页面上
-                 outputText.innerHTML = replyText; 
-  
-             } catch (error) { 
-  
-                 outputText.innerHTML = "抱歉，微光暂时未能照达。请检查 API Key 是否正确填写，或稍后再试。"; 
-  
-                 console.error(error); 
-  
-             } finally { 
-  
-                 outputText.classList.remove('typing-cursor'); 
-  
-                 bottomNav.style.opacity = '1'; 
-  
-             } 
-  
-         } 
-  
-     </script></body></html>
+    </script></body></html>
