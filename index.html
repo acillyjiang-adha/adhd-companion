@@ -1,392 +1,287 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADHD 守护</title>
-
-    <!-- Firebase SDK (v9 Compat Mode) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <script src="./firebase-config.js" type="module"></script>
-
+    <title>静音 - ADHD守护</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" /> 
-  
-     <style> 
-  
-         body { 
-  
-             font-family: "LXGW WenKai", sans-serif; 
-  
-             background-color: #F9F9F7;  
-  
-             color: #4A4A4A; 
-  
-         } 
-  
-  
-  
-         /* 欢迎语的呼吸与渐隐 */ 
-  
-         .welcome-text { 
-  
-             letter-spacing: 0.15em; line-height: 2; 
-  
-             animation: breathFadeIn 2.5s ease-out forwards; 
-  
-             transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); 
-  
-             max-height: 100px; 
-  
-             overflow: hidden; 
-  
-         } 
-  
-         @keyframes breathFadeIn { 
-  
-             0% { opacity: 0; transform: translateY(8px); } 
-  
-             100% { opacity: 0.6; transform: translateY(0); } 
-  
-         } 
-  
-         .welcome-text.dimmed { opacity: 0.2 !important; } 
-  
-         .welcome-text.hidden-collapse { opacity: 0 !important; max-height: 0; margin-bottom: 0 !important; transform: translateY(-20px); } 
-  
-  
-  
-         /* 输入框的静音质感 */ 
-  
-         .whisper-input { 
-  
-             background-color: #FFFFFF; 
-  
-             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03); 
-  
-             border: 1px solid transparent; 
-  
-             outline: none; 
-  
-             transition: all 1s ease-in-out; 
-  
-         } 
-  
-         .whisper-input::placeholder { color: #A1A1A1; font-weight: 300; letter-spacing: 0.05em; } 
-  
-         .whisper-input:disabled { background-color: #FAF9F5; color: #888888; box-shadow: none; border: 1px solid #F4F2EE; } 
-  
-  
-  
-         #submitArea { transition: all 1s ease; } 
-  
-  
-  
-         /* AI 回信区 */ 
-  
-         .ai-response-area { 
-  
-             max-height: 0; opacity: 0; overflow: hidden; 
-  
-             transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
-  
-         } 
-  
-         .ai-response-area.expanded { 
-  
-             max-height: 2000px;  
-  
-             opacity: 1; margin-top: 2rem; 
-  
-         } 
-  
-         .typing-cursor::after { content: '...'; animation: pulse 1.5s infinite; color: #8BA88E; } 
-  
-  
-  
-         /* 弹窗毛玻璃效果 */ 
-  
-         .glass-modal { 
-  
-             background: rgba(249, 249, 247, 0.85); 
-  
-             backdrop-filter: blur(8px); 
-  
-             -webkit-backdrop-filter: blur(8px); 
-  
-             transition: opacity 0.8s ease; 
-  
-         } 
-  
-  
-  
-         ::-webkit-scrollbar { display: none; } 
-  
-     </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
-    <!-- 统一的、由JS动态渲染的用户状态容器 -->
-    <div id="auth-status-container" style="position: absolute; top: 20px; right: 20px; font-size: 14px; color: #888; z-index: 10;">
-        加载中...
-    </div>
-
-    <!-- 登录弹窗 -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
-            <!-- 登录/注册切换 -->
-            <div class="flex border-b mb-6">
-                <button id="loginTab" class="flex-1 py-2 font-medium border-b-2 border-[#8BA88E] text-[#8BA88E]" onclick="setAuthMode('login')">登录</button>
-                <button id="registerTab" class="flex-1 py-2 font-medium text-gray-500" onclick="setAuthMode('register')">注册</button>
-            </div>
-
-            <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4">
-            <input id="passwordInput" type="password" placeholder="请输入密码（至少6位）" class="w-full border p-2 rounded mb-4">
-            
-            <div class="flex justify-end gap-4 mt-4">
-                <button onclick="closeLoginModal()" class="text-[#888]">取消</button>
-                <button id="authActionBtn" onclick="handleAuthAction()" class="bg-[#8BA88E] text-white px-6 py-2 rounded-lg">登录</button>
-            </div>
-
-            <p class="text-xs text-gray-400 mt-6 text-center">您的数据经过加密存储，仅用于为您生成个人微光档案，我们不会向任何第三方透露您的信息。</p>
-        </div>
-    </div>
-
-
- 
-  
-      
-  
-     <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#F2E2DF]/20 to-transparent pointer-events-none"></div> 
-  
-  
-  
-     <div id="onboardingModal" class="fixed inset-0 z-50 glass-modal flex items-center justify-center opacity-0 pointer-events-none"> 
-  
-         <div class="bg-white p-10 sm:p-14 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-[#F4F2EE] w-full max-w-lg transform translate-y-4 transition-transform duration-800" id="modalCard"> 
-  
-             <h2 class="text-2xl text-[#4A4A4A] mb-3 tracking-wide text-center">初次见面</h2> 
-  
-             <p class="text-[#888888] text-sm tracking-widest text-center mb-10 leading-loose"> 
-  
-                 在开始这段旅程前，<br>让我们稍微了解一下你的小探险家。 
-  
-             </p> 
-  
-              
-  
-             <div class="space-y-8"> 
-  
-                 <div> 
-  
-                     <label class="block text-sm text-[#BDBDBD] mb-2 tracking-widest">怎么称呼这个小家伙？</label> 
-  
-                     <input type="text" id="childName" placeholder="例如：浩浩 / 妹妹" class="w-full bg-[#FAF9F5] border-none rounded-xl px-5 py-4 text-[#5C5C5C] focus:ring-2 focus:ring-[#8BA88E]/30 outline-none transition-all"> 
-  
-                 </div> 
-  
-                 <div> 
-  
-                     <label class="block text-sm text-[#BDBDBD] mb-2 tracking-widest">Ta最让你头疼又好笑的一个特质是？</label> 
-  
-                     <input type="text" id="childTrait" placeholder="例如：永远在动 / 拼乐高专注但写字喊累" class="w-full bg-[#FAF9F5] border-none rounded-xl px-5 py-4 text-[#5C5C5C] focus:ring-2 focus:ring-[#8BA88E]/30 outline-none transition-all"> 
-  
-                 </div> 
-  
-             </div> 
-  
-  
-  
-             <div class="mt-12 text-center"> 
-  
-                 <button onclick="saveProfile()" class="bg-[#8BA88E] text-white px-10 py-3.5 rounded-full text-sm tracking-widest hover:shadow-lg hover:-translate-y-1 transition-all duration-300"> 
-  
-                     开启守护日记 
-  
-                 </button> 
-  
-             </div> 
-  
-         </div> 
-  
-     </div> 
-  
-  
-  
-     <div class="w-full max-w-2xl mt-auto mb-auto transition-all duration-1000 flex flex-col" id="mainContainer"> 
-  
-          
-  
-         <div id="welcomeText" class="welcome-text text-center text-xl sm:text-2xl mb-12 sm:mb-16"> 
-  
-             <p>此刻，让世界静音。</p> 
-  
-             <p>这里，只有你自己。</p> 
-  
-         </div> 
-  
-  
-  
-         <div class="relative w-full transition-transform duration-1000 ease-in-out" id="inputWrapper"> 
-  
-             <textarea id="diaryInput" rows="5"  
-  
-                       class="whisper-input w-full rounded-[2rem] p-8 sm:p-12 text-[19px] text-[#5C5C5C] leading-loose resize-none pb-20" 
-  
-                       placeholder="哪怕只是几个字也挺好的..."></textarea> 
-  
-              
-  
-             <div class="absolute bottom-8 right-10 opacity-0 flex items-center gap-8" id="submitArea"> 
-  
-                 <button id="saveBtn" onclick="saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[13px] tracking-widest"> 
-  
-                     <span>默默封存</span> 
-  
-                 </button> 
-  
-                 <button id="submitBtn" onclick="startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[15px] tracking-widest font-medium group"> 
-  
-                     <span id="btnText">听听回音</span> 
-  
-                     <span id="btnArrow" class="text-lg group-hover:translate-x-1 transition-transform">→</span> 
-  
-                 </button> 
-  
-             </div> 
-  
-         </div> 
-  
-  
-  
-         <div id="responseContainer" class="ai-response-area w-full"> 
-  
-             <div id="responseBox" class="bg-white rounded-3xl p-8 sm:p-12 border border-[#E1E8E0] shadow-sm relative"> 
-  
-                 <div id="responseLabel" class="absolute top-8 left-8 flex items-center gap-2 hidden"> 
-  
-                     <div class="w-2 h-2 rounded-full bg-[#8BA88E] animate-pulse"></div> 
-  
-                     <span class="text-[#8BA88E] text-xs tracking-widest">微光回信</span> 
-  
-                 </div> 
-  
-                 <div id="outputText" class="text-[#5C5C5C] leading-loose text-[17px] text-justify mt-8 whitespace-pre-wrap"></div> 
-  
-             </div> 
-  
-              
-  
-             <div id="bottomNav" class="mt-8 text-center opacity-0 transition-opacity duration-1000">
-            <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">试试这些工具</a>
-        </div>
-
-        <!-- AI 回复后的操作按钮 -->
-        <div id="actionNav" class="mt-8 text-center opacity-0 transition-opacity duration-1000 flex gap-6">
-            <button onclick="saveToCards()" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">存为卡片</button>
-            <button onclick="window.location.reload()" class="text-xs text-[#888] tracking-widest hover:text-[#4A4A4A] transition-colors">再聊一次</button>
-        </div> 
-  
-             <!-- 登录后可见的功能区域 --> 
-             <div id="historySection" class="hidden mt-12 w-full max-w-2xl text-center"> 
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6"> 
-                     <div id="myCardsBtn" class="bg-white/50 p-6 rounded-lg cursor-pointer hover:bg-white transition-all"> 
-                         <h3 class="font-medium">我的微光卡片</h3> 
-                         <p class="text-sm text-[#888] mt-2">回顾每一次的倾诉与重构</p> 
-                     </div> 
-                     <div id="monthlyAnalysisBtn" class="bg-white/50 p-6 rounded-lg cursor-pointer hover:bg-white transition-all"> 
-                         <h3 class="font-medium">生成本月微光分析</h3> 
-                         <p class="text-sm text-[#888] mt-2">查看您的情绪曲线与成长</p> 
-                     </div> 
-                 </div> 
-             </div> 
-  
-         </div> 
-  
-     </div> 
-  
-  
-  
-         <script type="module">
-        // 从配置文件导入 Firebase 服务
-        import { auth, db } from './firebase-config.js';
-
-        // --- 全局变量 ---
-        let currentUser = null;
-
-        // --- DOM 元素获取 ---
-        const userEntryBtn = document.getElementById('userEntryBtn');
-        const userInfo = document.getElementById('userInfo');
-        const userEmailDisplay = document.getElementById('userEmailDisplay');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const loginModal = document.getElementById('loginModal');
-        const historySection = document.getElementById('historySection');
-        const monthlyAnalysisBtn = document.getElementById('monthlyAnalysisBtn');
-        const myCardsBtn = document.getElementById('myCardsBtn');
-        const modal = document.getElementById('onboardingModal');
-        const modalCard = document.getElementById('modalCard');
-        const input = document.getElementById('diaryInput');
-        const welcome = document.getElementById('welcomeText');
-        const submitArea = document.getElementById('submitArea');
-        const responseContainer = document.getElementById('responseContainer');
-        const responseBox = document.getElementById('responseBox');
-        const responseLabel = document.getElementById('responseLabel');
-        const outputText = document.getElementById('outputText');
-        const mainContainer = document.getElementById('mainContainer');
-        const bottomNav = document.getElementById('bottomNav');
-
-        // --- 核心鉴权逻辑 ---
-        // 确保 Firebase SDK 加载完成后再监听状态
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            auth.onAuthStateChanged(user => {
-                currentUser = user;
-                updateUIForUser(user);
-                handleSignInRedirect();
-            });
-        } else {
-            console.error('Firebase SDK 未正确加载');
-            // 显示错误状态
-            updateUIForUser(null);
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+    <style>
+        body {
+            font-family: "LXGW WenKai", sans-serif;
+            background-color: #F9F9F7;
+            color: #4A4A4A;
         }
+        body.is-loading .interactive-button {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .welcome-text {
+            letter-spacing: 0.15em; line-height: 2;
+            animation: breathFadeIn 2.5s ease-out forwards;
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 100px;
+            overflow: hidden;
+        }
+        @keyframes breathFadeIn {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 0.6; transform: translateY(0); }
+        }
+        .welcome-text.dimmed { opacity: 0.2 !important; }
+        .welcome-text.hidden-collapse { opacity: 0 !important; max-height: 0; margin-bottom: 0 !important; transform: translateY(-20px); }
+        .whisper-input {
+            background-color: #FFFFFF;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+            border: 1px solid transparent;
+            outline: none;
+            transition: all 1s ease-in-out;
+        }
+        .whisper-input::placeholder { color: #A1A1A1; font-weight: 300; letter-spacing: 0.05em; }
+        .whisper-input:disabled { background-color: #FAF9F5; color: #888888; box-shadow: none; border: 1px solid #F4F2EE; }
+        #submitArea { transition: all 1s ease; }
+        .ai-response-area {
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ai-response-area.expanded {
+            max-height: 2000px;
+            opacity: 1; margin-top: 2rem;
+        }
+        .typing-cursor::after {
+            content: '...';
+            animation: pulse 1.5s infinite;
+            color: #8BA88E;
+        }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto is-loading">
 
-        function handleSignInRedirect() {
-            if (auth.isSignInWithEmailLink(window.location.href) && !currentUser) {
-                let email = window.localStorage.getItem('emailForSignIn');
-                if (!email) {
-                    email = window.prompt('为了完成登录，请输入您的邮箱：');
-                }
-                auth.signInWithEmailLink(email, window.location.href)
-                    .then(() => window.localStorage.removeItem('emailForSignIn'))
-                    .catch(error => alert('登录失败: ' + error.message));
+    <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#F2E2DF]/20 to-transparent pointer-events-none"></div>
+
+    <div class="w-full max-w-2xl mt-auto mb-auto transition-all duration-1000 flex flex-col" id="mainContainer">
+
+        <div id="welcomeText" class="welcome-text text-center text-xl sm:text-2xl mb-12 sm:mb-16">
+            <p>此刻，让世界静音。</p>
+            <p>这里，只有你自己。</p>
+        </div>
+
+        <div class="relative w-full transition-transform duration-1000 ease-in-out" id="inputWrapper">
+            <textarea id="diaryInput" rows="5"
+                      class="whisper-input w-full rounded-[2rem] p-8 sm:p-12 text-[19px] text-[#5C5C5C] leading-loose resize-none pb-20"
+                      placeholder="哪怕只是几个字也挺好的..."></textarea>
+
+            <div class="absolute bottom-8 right-10 opacity-0 flex items-center gap-8" id="submitArea">
+                <button id="saveBtn" onclick="saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[13px] tracking-widest">
+                    <span>默默封存</span>
+                </button>
+                <button id="submitBtn" onclick="startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[15px] tracking-widest font-medium group">
+                    <span id="btnText">听听回音</span>
+                    <span id="btnArrow" class="text-lg group-hover:translate-x-1 transition-transform">→</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="responseContainer" class="ai-response-area w-full">
+            <div id="responseBox" class="bg-white rounded-3xl p-8 sm:p-12 border border-[#E1E8E0] shadow-sm relative">
+                <div id="responseLabel" class="absolute top-8 left-8 flex items-center gap-2 hidden">
+                    <div class="w-2 h-2 rounded-full bg-[#8BA88E] animate-pulse"></div>
+                    <span class="text-[#8BA88E] text-xs tracking-widest">微光回信</span>
+                </div>
+
+                <div id="outputText" class="text-[#5C5C5C] leading-loose text-[17px] text-justify mt-8 whitespace-pre-wrap"></div>
+            </div>
+
+            <div class="mt-8 text-center opacity-0 transition-opacity duration-1000 flex items-center justify-center gap-6" id="bottomNav">
+                 <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">
+                    需要物理外挂？前往工具箱
+                </a>
+                <span class="text-xs text-[#8BA88E]/30">|</span>
+                <button onclick="openProfileModal()" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">
+                   孩子信息配置
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-[#FDFBF7] w-11/12 max-w-md rounded-3xl shadow-xl p-8 transform scale-95 transition-transform duration-300" id="profileCard">
+            <h2 class="text-xl font-medium text-[#4A4A4A] mb-2">配置孩子信息</h2>
+            <p class="text-sm text-[#888888] mb-6 leading-relaxed">为了让老师的分析更精准，请简单设置一下孩子的情况。信息仅保存在你的本地设备，绝对隐私。</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-[#888888] mb-1">孩子年龄</label>
+                    <input type="number" id="childAge" placeholder="例如：14" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm text-[#888888] mb-1">孩子性别</label>
+                    <select id="childGender" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
+                        <option value="男孩">男孩</option>
+                        <option value="女孩">女孩</option>
+                        <option value="不愿透露">不愿透露</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-[#888888] mb-1">主要困扰或确诊情况 (一句话概括)</label>
+                    <input type="text" id="childDiagnosis" placeholder="如：ADHD伴随ODD，极度抗拒写作业" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
+                </div>
+            </div>
+            <button onclick="saveProfileAndClose()" class="w-full mt-8 bg-[#8BA88E] text-white py-3 rounded-full font-medium tracking-wide hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300">
+                保存信息
+            </button>
+        </div>
+    </div>
+
+    <!-- 统一的、由JS动态渲染的用户状态容器 -->
+    <div id="auth-status-container" class="absolute top-5 right-5 text-sm text-[#888] z-10"></div>
+
+    <div id="toast" class="fixed top-10 transform -translate-y-full opacity-0 bg-[#3C3C3C] text-white px-6 py-3 rounded-full shadow-lg transition-all duration-500 z-50 pointer-events-none">
+        提示信息
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        // 请替换为你的 Firebase 项目配置
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        let auth = null;
+        let db = null;
+        let currentUser = null; // Global variable to store current user
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore(); // Assuming firestore might be used for user data/records
+        } catch (e) {
+            console.error("Firebase 初始化失败:", e);
+            const container = document.getElementById('auth-status-container');
+            if (container) {
+                container.innerHTML = '<span style="color: #d93025;">Firebase 初始化错误，请检查配置。</span>';
             }
         }
 
+        // Function to update the UI based on user login status
         function updateUIForUser(user) {
             const container = document.getElementById('auth-status-container');
-            if (!container) return; // 确保容器存在
-            container.innerHTML = ''; // 彻底清空，防止重影
+            if (!container) return; // Ensure container exists
+
+            // Clear previous content to avoid conflicts
+            container.innerHTML = '';
 
             if (user) {
-                // 已登录状态：显示下拉菜单
+                // User is logged in
+                container.innerHTML = `
+                    <div class="relative">
+                        <button class="flex items-center gap-1 text-[#888] hover:text-[#4A4A4A] transition-colors" onclick="toggleDropdown(event)">
+                            <span>我的记录</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="user-dropdown" class="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-lg py-1 hidden">
+                            <a href="#" class="block px-4 py-2 text-sm text-[#4A4A4A] hover:bg-gray-100" onclick="viewMyRecords(event)">查看记录</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-[#4A4A4A] hover:bg-gray-100" onclick="signOutUser(event)">退出登录</a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // User is logged out
+                container.innerHTML = `
+                    <button onclick="signInWithGoogle()" class="text-[#888] hover:text-[#4A4A4A] transition-colors">登录 / 注册</button>
+                `;
+            }
+        }
+
+        // Function to handle Google Sign-In
+        async function signInWithGoogle() {
+            if (!auth) {
+                showToast("登录服务未准备好，请稍后再试。");
+                return;
+            }
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithRedirect(provider);
+            } catch (error) {
+                console.error("Error during Google sign-in:", error);
+                showToast("登录失败，请稍后再试。");
+            }
+        }
+
+        // Function to handle sign-out
+        async function signOutUser(event) {
+            event.preventDefault(); // Prevent default link behavior
+            if (!auth) {
+                showToast("退出服务未准备好，请稍后再试。");
+                return;
+            }
+            try {
+                await auth.signOut();
+                showToast("已退出登录。");
+                // onAuthStateChanged listener will automatically call updateUIForUser
+            } catch (error) {
+                console.error("Error during sign-out:", error);
+                showToast("退出登录失败。");
+            }
+        }
+
+        // Dropdown toggle for "我的记录"
+        function toggleDropdown(event) {
+            event.stopPropagation(); // Prevent click from closing immediately
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+        }
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', (event) => {
+            const dropdown = document.getElementById('user-dropdown');
+            const authButton = document.querySelector('#auth-status-container button'); // The button that opens the dropdown
+            if (dropdown && !dropdown.contains(event.target) && (!authButton || !authButton.contains(event.target))) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Placeholder for viewing records
+        function viewMyRecords(event) {
+            event.preventDefault();
+            showToast("查看记录功能待开发...");
+            // Here you would navigate to a page or open a modal to show user's saved records
+        }
+
+        // --- 统一的 UI 更新与全局状态解锁 ---
+        function updateUIForUser(userOrState) {
+            const container = document.getElementById('auth-status-container');
+            if (!container) return;
+            container.innerHTML = ''; // 强制清空
+
+            if (userOrState === 'offline') {
+                container.innerHTML = '<button onclick="signInWithGoogle()" class="cursor-pointer">我的记录 (离线)</button>';
+            } else if (userOrState) {
                 container.innerHTML = `
                     <div class="relative" id="user-menu-container">
-                        <button id="userMenuBtn" class="cursor-pointer">我的记录</button>
+                        <button id="userMenuBtn" class="cursor-pointer">我的记录 (已登录)</button>
                         <div id="userMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20">
-                            <a href="/cards.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">查看历史记录</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="viewMyRecords(event)">查看记录</a>
                             <button id="logoutBtnInsideMenu" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">退出登录</button>
                         </div>
                     </div>
                 `;
-
-                // 为下拉菜单添加交互逻辑
                 const menuBtn = document.getElementById('userMenuBtn');
-                const dropdown = document.getElementById('userMenuDropdown');
-                if (menuBtn && dropdown) {
-                    menuBtn.addEventListener('click', () => dropdown.classList.toggle('hidden'));
-                    const logoutBtnInsideMenu = document.getElementById('logoutBtnInsideMenu');
-                    if (logoutBtnInsideMenu) {
-                        logoutBtnInsideMenu.addEventListener('click', () => auth.signOut());
-                    }
-                }
-
+                if (menuBtn) menuBtn.addEventListener('click', () => document.getElementById('userMenuDropdown').classList.toggle('hidden'));
+                const logoutBtn = document.getElementById('logoutBtnInsideMenu');
+                if (logoutBtn) logoutBtn.addEventListener('click', () => auth.signOut());
                 // 点击菜单外部关闭菜单
                 document.addEventListener('click', (event) => {
                     const menuContainer = document.getElementById('user-menu-container');
@@ -395,292 +290,313 @@
                         if (dropdown) dropdown.classList.add('hidden');
                     }
                 });
-
             } else {
-                // 未登录状态：显示登录按钮
-                container.innerHTML = '<button onclick="openLoginModal()" class="cursor-pointer">我的记录</button>';
+                container.innerHTML = '<button onclick="signInWithGoogle()" class="cursor-pointer">我的记录</button>';
             }
+            // 解锁全局UI
+            document.body.classList.remove('is-loading');
         }
 
-        const loginModal = document.getElementById('loginModal');
-        let authMode = 'login'; // 'login' or 'register'
-
-        window.openLoginModal = () => loginModal.classList.remove('hidden');
-        window.closeLoginModal = () => loginModal.classList.add('hidden');
-
-        window.setAuthMode = (mode) => {
-            authMode = mode;
-            const loginTab = document.getElementById('loginTab');
-            const registerTab = document.getElementById('registerTab');
-            const authActionBtn = document.getElementById('authActionBtn');
-
-            if (mode === 'login') {
-                loginTab.classList.add('border-[#8BA88E]', 'text-[#8BA88E]');
-                loginTab.classList.remove('text-gray-500');
-                registerTab.classList.remove('border-[#8BA88E]', 'text-[#8BA88E]');
-                registerTab.classList.add('text-gray-500');
-                authActionBtn.textContent = '登录';
-            } else {
-                registerTab.classList.add('border-[#8BA88E]', 'text-[#8BA88E]');
-                registerTab.classList.remove('text-gray-500');
-                loginTab.classList.remove('border-[#8BA88E]', 'text-[#8BA88E]');
-                loginTab.classList.add('text-gray-500');
-                authActionBtn.textContent = '注册';
-            }
-        };
-
-        window.handleAuthAction = async () => {
-            const email = document.getElementById('emailInput').value;
-            const password = document.getElementById('passwordInput').value;
-
-            if (!email || !password) {
-                alert('邮箱和密码不能为空。');
-                return;
-            }
-
-            try {
-                if (authMode === 'login') {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    console.log("登录成功！");
-                } else {
-                    if (password.length < 6) {
-                        alert('为了您的账户安全，密码至少需要6位。');
-                        return;
+        // --- 核心鉴权逻辑 (带3秒超时) ---
+        function setupAuthListener() {
+            if (auth) {
+                let authResponded = false;
+                const authTimeout = setTimeout(() => {
+                    if (!authResponded) {
+                        console.warn("Firebase Auth 响应超时，进入离线模式。");
+                        authResponded = true;
+                        updateUIForUser('offline');
                     }
-                    await auth.createUserWithEmailAndPassword(email, password);
-                    console.log("注册成功！");
-                }
-                closeLoginModal();
-            } catch (error) {
-                // 温柔的中文错误提示
-                let message = '操作失败，请稍后再试。';
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        message = '这个邮箱还没有注册过，要不要切换到注册试试？';
-                        break;
-                    case 'auth/wrong-password':
-                        message = '密码好像输错了，要不要再仔细检查一下？';
-                        break;
-                    case 'auth/email-already-in-use':
-                        message = '这个邮箱已经被注册啦，直接登录吧！';
-                        break;
-                    case 'auth/weak-password':
-                        message = '为了您的账户安全，密码至少需要6位哦。';
-                        break;
-                }
-                alert(message);
-            }
-        };
+                }, 3000);
 
-        // 修复：只有在 logoutBtn 存在时才添加事件监听器
-        const logoutBtnElement = document.getElementById('logoutBtn');
-        if (logoutBtnElement) {
-            logoutBtnElement.addEventListener('click', () => auth.signOut());
+                auth.onAuthStateChanged(user => {
+                    if (!authResponded) {
+                        clearTimeout(authTimeout);
+                        authResponded = true;
+                    }
+                    currentUser = user;
+                    updateUIForUser(user);
+                });
+            } else {
+                console.error('Firebase Auth unavailable.');
+                updateUIForUser('offline');
+            }
         }
 
-        // --- 页面访问拦截 ---
-        monthlyAnalysisBtn.addEventListener('click', () => {
-            if (!currentUser) openLoginModal();
-            else window.location.href = '/monthly-report.html';
-        });
-
-        myCardsBtn.addEventListener('click', () => {
-            if (!currentUser) openLoginModal();
-            else window.location.href = '/cards.html';
-        });
-
-        // --- 页面加载与交互逻辑 ---
-        window.onload = () => {
-            const childName = localStorage.getItem('adhd_child_name');
-            if(!childName) {
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modalCard.classList.remove('translate-y-4');
-            }
-        };
-
-        window.saveProfile = function() {
-            const name = document.getElementById('childName').value.trim() || '孩子';
-            const trait = document.getElementById('childTrait').value.trim() || '活跃';
-            localStorage.setItem('adhd_child_name', name);
-            localStorage.setItem('adhd_child_trait', trait);
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            modalCard.classList.add('translate-y-4');
+        // Call the listener setup function after Firebase initialization attempt
+        if (firebase.apps.length > 0) {
+            setupAuthListener();
+        } else {
+            updateUIForUser('offline');
         }
 
+
+        const input = document.getElementById('diaryInput');
+        const welcome = document.getElementById('welcomeText');
+        const submitArea = document.getElementById('submitArea');
+        const submitBtn = document.getElementById('submitBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const btnText = document.getElementById('btnText');
+        const btnArrow = document.getElementById('btnArrow');
+        const responseContainer = document.getElementById('responseContainer');
+        const responseBox = document.getElementById('responseBox');
+        const responseLabel = document.getElementById('responseLabel');
+        const outputText = document.getElementById('outputText');
+        const mainContainer = document.getElementById('mainContainer');
+        const bottomNav = document.getElementById('bottomNav');
+        const profileModal = document.getElementById('profileModal');
+        const profileCard = document.getElementById('profileCard');
+        const toast = document.getElementById('toast');
+
+        // --- 弹窗与提示 ---
+        document.addEventListener('DOMContentLoaded', () => {
+             const savedProfile = localStorage.getItem('child_profile');
+             if (!savedProfile) { openProfileModal(); }
+        });
+
+        function openProfileModal() {
+            const savedProfile = localStorage.getItem('child_profile');
+            if (savedProfile) {
+                try {
+                    const profileData = JSON.parse(savedProfile);
+                    document.getElementById('childAge').value = profileData.age || '';
+                    document.getElementById('childGender').value = profileData.gender || '男孩';
+                    document.getElementById('childDiagnosis').value = profileData.diagnosis || '';
+                } catch(e) {
+                    localStorage.removeItem('child_profile'); // 清除可能已损坏的旧格式数据
+                }
+            }
+            profileModal.classList.remove('hidden');
+            setTimeout(() => {
+                profileModal.classList.remove('opacity-0');
+                profileCard.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function saveProfileAndClose() {
+             const profileData = {
+                age: document.getElementById('childAge').value || '未知年龄',
+                gender: document.getElementById('childGender').value,
+                diagnosis: document.getElementById('childDiagnosis').value || '未填写具体特质'
+             };
+             localStorage.setItem('child_profile', JSON.stringify(profileData));
+
+             profileModal.classList.add('opacity-0');
+             profileCard.classList.add('scale-95');
+
+             setTimeout(() => {
+                 profileModal.classList.add('hidden');
+                 showToast("孩子信息已安妥保存");
+             }, 300);
+        }
+
+        function showToast(message) {
+            toast.innerText = message;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.transform = 'translateY(-100%)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // 输入框交互
         input.addEventListener('focus', () => welcome.classList.add('dimmed'));
-        input.addEventListener('blur', () => { if(input.value.trim() === '') welcome.classList.remove('dimmed'); });
-        input.addEventListener('input', () => { submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0'; });
+        input.addEventListener('blur', () => {
+            if(input.value.trim() === '') welcome.classList.remove('dimmed');
+        });
+        input.addEventListener('input', () => {
+            submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0';
+        });
 
+        // 通用的舞台变形逻辑 (纯视觉)
         function transformStage() {
             welcome.classList.add('hidden-collapse');
-            // input.disabled = true; // 交给 startAIAnalysis 函数管理
             mainContainer.classList.remove('mt-auto', 'mb-auto');
             mainContainer.classList.add('mt-12');
-            // submitArea.style.opacity = '0'; // 不再由这里隐藏
-            // setTimeout(() => submitArea.style.display = 'none', 1000); // 不再由这里隐藏
             responseContainer.classList.add('expanded');
         }
 
-        window.saveSilently = function() {
-            if(!input.value.trim()) return;
+        function saveToLocal(text) {
+            let diaries = JSON.parse(localStorage.getItem('adhd_diaries') || '[]' );
+            diaries.push({ date: new Date().toISOString(), content: text });
+            localStorage.setItem('adhd_diaries', JSON.stringify(diaries));
+        }
+
+        // --- 路线 1：默默封存 (不调用 AI) ---
+        function saveSilently() {
+            const userText = input.value.trim();
+            if(!userText) return;
+            saveToLocal(userText);
             transformStage();
+
+            // Disable input and buttons
+            input.disabled = true;
+            submitBtn.disabled = true;
+            saveBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitArea.style.opacity = '0'; // Hide submit area
+            setTimeout(() => submitArea.style.display = 'none', 1000); // Collapse after transition
+
             responseBox.classList.replace('border-[#E1E8E0]', 'border-[#F4F2EE]');
             responseBox.classList.replace('bg-white', 'bg-[#FAF9F5]');
             outputText.classList.add('text-center', 'text-[#888888]', 'tracking-widest');
             outputText.innerHTML = "情绪已安放。<br>没有评判，只有接纳。";
-            setTimeout(() => bottomNav.style.opacity = '1', 800);
+
+            setTimeout(() => {
+                bottomNav.style.opacity = '1';
+                // For silent save, we don't re-enable input/buttons or show submitArea
+                // as the interaction is considered "done" for this entry.
+            }, 800);
         }
 
-        window.startAIAnalysis = async function() {
+        // --- 路线 2：触发 AI 分析 ---
+        async function startAIAnalysis() {
             const userText = input.value.trim();
             if(!userText) return;
 
-            const submitBtn = document.querySelector('button[onclick="startAIAnalysis()"]');
-            const originalText = submitBtn.innerHTML;
+            saveToLocal(userText);
+            transformStage(); // Visual transformation
 
-            // 1. 发送请求前：改变按钮文字并禁用按钮
-            submitBtn.innerHTML = "微光正在汇聚...";
-            submitBtn.disabled = true;
+            // Disable input and buttons immediately
             input.disabled = true;
+            submitBtn.disabled = true;
+            saveBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitArea.style.opacity = '0'; // Hide submit area
+            setTimeout(() => submitArea.style.display = 'none', 1000); // Collapse after transition
 
-            try {
-                // 转换UI，但不隐藏提交按钮
-                transformStage();
-                responseLabel.classList.remove('hidden');
-                outputText.innerHTML = ''; // 清空旧回复
-                outputText.classList.add('typing-cursor');
-                await fetchDeepSeek(userText);
-            } finally {
-                // 2. 请求结束后：恢复按钮和输入框状态
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-                input.disabled = false;
-            }
+            responseLabel.classList.remove('hidden');
+            outputText.classList.add('typing-cursor');
+            outputText.innerHTML = ""; // Clear previous output
+
+            await fetchDeepSeek(userText);
         }
 
-        window.saveToCards = function() {
-            if (!currentUser) {
-                openLoginModal(); // 未登录，引导登录
-            } else {
-                // 这里我们假设AI回复已经完成，并且数据已经存在于变量中
-                const originalText = input.value.trim();
-                const reframeText = outputText.innerHTML;
-                // 注意：emotionTag 需要在 fetchDeepSeek 中被保存到一个全局变量中才能在这里访问
-                saveInteraction(originalText, reframeText, window.latestEmotionTag);
-                alert('已为您存为微光卡片。');
-            }
-        }
-
-        // --- AI 对话与数据存储 ---
-        async function saveInteraction(originalText, reframeText, emotionData) {
-            if (!currentUser) return; // 未登录，静默返回
-
-            try {
-                await db.collection('interactions').add({
-                    uid: currentUser.uid,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    original_text: originalText,
-                    reframe_text: reframeText,
-                    emotion_label: emotionData ? emotionData.label : '未知',
-                    emotion_color: emotionData ? emotionData.color : '#888888',
-                });
-            } catch (error) {
-                console.error("Firestore 写入失败: ", error);
-            }
-        }
-
+        // --- 连接 DeepSeek ---
         async function fetchDeepSeek(text) {
-            const API_URL = "/api/chat";
-            const childName = localStorage.getItem('adhd_child_name') || '孩子';
-            const childTrait = localStorage.getItem('adhd_child_trait') || '';
+            let profileString = "未知（请根据家长描述推测）";
+            const savedProfile = localStorage.getItem('child_profile');
+            if (savedProfile) {
+                try {
+                    const profileData = JSON.parse(savedProfile);
+                    profileString = `${profileData.age}岁，${profileData.gender}。特质与困扰：${profileData.diagnosis}`;
+                } catch(e) {
+                    profileString = savedProfile; // 兼容旧的纯字符串格式
+                }
+            }
+            const enrichedUserText = `【后台隐藏信息：孩子基本情况档案 -> ${profileString}】\n\n家长的今日描述：\n${text}`;
 
-            const systemPrompt = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。 
- 
- 孩子叫“${childName}”，特质是“${childTrait}”。 
- 
- 
- 
- 【⚠️ 危机干预最高指令——涉及生命安全时无条件触发】 
- 
- 如果家长描述的内容包含以下任何一种极端情况： 
- 
- - 孩子有自残、自杀的言语或行为。 
- 
- - 孩子对他人使用严重的致命暴力或持械。 
- 
- - 家长本人表达了想要伤害自己、轻生或伤害他人的念头。 
- 
- 你必须立刻【彻底放弃】所有的神经学分析和物理建议！在回复的最开头，强制使用以下包含HTML标签的红色加粗文字报警： 
- 
- <strong style="color: #d93025; font-size: 16px; display: block; margin-bottom: 15px;">⚠️ 安全提醒：您描述的情况已超出常规的情绪支持范畴，涉及生命安全。请立即优先保护您和孩子的生命安全！<br>请您立刻心理医生，寻求专业的人工危机干预。</strong> 
- 
- 输出完这段红字后，用极其简短、克制的话语安抚家长当下的惊恐，告诉他们“现在的首要任务是确保安全，寻求专业医疗介入，不要试图自己独自解决”。【绝对不要】在这类回复中讲比喻或给出常规动作建议。 
- 
- 
- 
- 【常规语法与表达红线——平时遵循】 
- 
- （...这里保留我们刚才定好的那4条红线：平实、完整比喻、不吞字、不加序号...） 
- 
- 
- 
- 【常规核心干预逻辑——平时遵循】 
- 
- （...这里保留我们刚才定好的4段逻辑...）`;
+            const systemPrompt = `你是一位专注解决 ADHD/ASD 及 ODD 青少年行为问题的资深临床行为分析师。家长现在正处于高压、耗竭或权力斗争的旋涡中。你的回复必须专业、客观、极其克制，提供具有强支撑力的结构化分析，绝不能有“哄小宝宝”的幼稚感或空洞的安慰。
+
+【🔴 强制格式与语调约束】
+1. 绝对禁用 Markdown排版（如加粗、#号）、禁用列表序号（如1.2.3.或①②③）。用自然的段落过渡。
+2. 绝对禁用客服套话、说教或废话（如“最后提醒”、“总之”、“希望能帮到你”、“这很正常”）。话说到具体的策略点立刻结束。
+3. 语调要求：冷静、克制、一针见血。用平视的视角，像一位专业的心理督导在和家长复盘案例。
+
+【💬 核心分析路径（自然融合到段落中）】
+1. 锚定情绪与现状：用极简的一句话点出家长目前的耗竭状态或陷入的权力斗争，不加评判。
+2. 剥离表象直击机制（认知重构）：这是你的核心价值！必须灵活运用以下神经科学比喻来打破家长的道德评判：
+   - 动力系统：ADHD遵循“兴趣驱动型神经系统(NICUP)”。他不是懒，他的大脑需要“新奇、挑战、紧迫”这把钥匙才能启动。
+   - 时间感知：他的时间观念像WiFi信号，离“现在”越近越强，离“未来”越远越弱（即“时间盲”）。
+   - 工作记忆：他的工作记忆容量只有常人的六成。就像同时运行太多APP的旧手机，一转身就把你的指令当成后台程序“杀”了。
+   - 情绪失控：他的前额叶发育比同龄人晚30%，情绪系统像一辆“没有减震器的汽车”，同样的颠簸会产生剧烈的弹跳。
+3. 降维打击策略：提供 1 到 2 个极其具体的干预动作。引导家长放弃“灭火模式”，开启“陪烧模式”（身体在场、语言最小化）。对于青少年，强调建立边界、外部化执行功能（如环境减法）或退出权力斗争。
+
+---
+📚 学习这种专业、克制的说话风格：
+
+看着这些文字，能感觉到你已经被这场无休止的拉锯战耗竭了。每天在同一个问题上爆发冲突，确实让人感到深深的挫败。
+
+他刚答应你去洗澡，转头又去玩手机，这在表面上看是屡教不改和态度恶劣。但从神经学角度看，他的工作记忆容量就像一台同时开了太多网页的旧电脑。当遇到游戏这个强刺激时，你刚才的指令直接被大脑当成无效的后台程序给“杀掉”了。同时，他的时间感知就像微弱的WiFi信号，根本无法体会“十分钟后睡觉”的紧迫感。
+
+今晚我们先退出反复大声提醒的死循环。你可以试着给他做一次物理上的切断，走到他面前，平视他，用非常简短的一句话下达指令，然后就留在原地看着他，直到他启动。如果他开始烦躁，不要急着去“灭火”或者讲道理，试着开启“陪烧模式”，安静地在旁边陪伴他度过这阵情绪波峰。当你停止进攻和说教，他的防御系统才会慢慢降温。
+
+---
+⚠️ 安全提醒
+如果家长描述的内容涉及孩子自残、对他人暴力、或家长有轻生念头，请暂停分析，在第一行明确回复：
+由于情况紧急，请您先放下手机，立即拨打当地急救电话（如120/911），或联系当地危机干预热线。您和孩子的人身安全高于一切分析。`;
+
+            const controller = new AbortController();
+            const signal = controller.signal;
+            const timeout = 3000; // 3 seconds timeout
+
+            const timeoutId = setTimeout(() => {
+                controller.abort(); // Abort the fetch request after timeout
+            }, timeout);
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        temperature: 0.5,
-                        frequency_penalty: 0,
-                        presence_penalty: 0,
+                        model: "deepseek-chat",
                         messages: [
                             { role: "system", content: systemPrompt },
-                            { role: "user", content: text }
-                        ]
-                    })
+                            { role: "user", content: enrichedUserText }
+                        ],
+                        stream: true
+                    }),
+                    signal: signal // Attach the abort signal
                 });
 
-                if (!response.ok) throw new Error('网络请求失败');
+                clearTimeout(timeoutId); // Clear the timeout if fetch completes successfully
 
-                const data = await response.json();
-                let rawReply = data.choices[0].message.content;
-
-                let emotionTag = null;
-                const tagRegex = /\s*\[EMOTION_TAG: (\{.*?\})\]/;
-                const match = rawReply.match(tagRegex);
-
-                if (match && match[1]) {
-                    try {
-                        emotionTag = JSON.parse(match[1]);
-                        window.latestEmotionTag = emotionTag; // 保存到全局变量
-                        // 从UI上彻底删除技术标签
-                        rawReply = rawReply.replace(tagRegex, '').trim();
-                    } catch (e) {
-                        console.error("情绪标签解析失败: ", e);
-                        window.latestEmotionTag = null;
-                    }
-                } else {
-                    window.latestEmotionTag = null;
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: '未知API错误' }));
+                    throw new Error(`API错误: ${response.status} - ${errorData.message || response.statusText}`);
                 }
 
-                // 渲染干净的回复到页面
-                outputText.innerHTML = rawReply;
-                
-                // 将解析出的数据传递给存储函数
-                await saveInteraction(text, rawReply, emotionTag);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                outputText.innerHTML = "";
 
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+                    for (const line of lines) {
+                        if (line.includes('[DONE]')) break;
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.choices[0].delta.content) {
+                                    outputText.innerHTML += data.choices[0].delta.content;
+                                }
+                            } catch (e) {
+                                console.warn("Error parsing chunk data:", e);
+                            }
+                        }
+                    }
+                }
             } catch (error) {
-                outputText.innerHTML = "抱歉，微光暂时未能照达。请检查网络连接或稍后再试。";
-                console.error(error);
+                clearTimeout(timeoutId); // Ensure timeout is cleared even on fetch error
+                console.error("Fetch DeepSeek error:", error);
+                if (error.name === 'AbortError') {
+                    outputText.innerHTML = "抱歉，微光未能及时照达。AI响应超时，请稍后再试。";
+                } else if (error.message.startsWith('API错误')) {
+                    outputText.innerHTML = `抱歉，AI服务出现问题：${error.message}。请稍后再试。`;
+                } else {
+                    outputText.innerHTML = "抱歉，微光暂时未能照达。请检查网络连接或稍后再试。";
+                }
             } finally {
                 outputText.classList.remove('typing-cursor');
-                // 不再恢复旧按钮，而是显示新的操作按钮
-                // const actionNav = document.getElementById('actionNav');
-                // if(actionNav) actionNav.style.opacity = '1';
+                bottomNav.style.opacity = '1';
+                // Re-enable input and buttons
+                input.disabled = false;
+                submitBtn.disabled = false;
+                saveBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                // Re-show submit area if AI failed, so user can retry or save silently
+                submitArea.style.display = 'flex'; // Make it visible again
+                submitArea.style.opacity = '1'; // Fade it back in
             }
         }
-
-    </script></body></html>
+    </script>
+</body>
+</html>
