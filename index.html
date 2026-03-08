@@ -120,7 +120,28 @@
   
          ::-webkit-scrollbar { display: none; } 
   
-     </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto"> 
+     </style></head><body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
+    <!-- 登录/用户信息区域 -->
+    <div style="position: absolute; top: 20px; right: 20px; font-size: 14px;">
+        <button id="loginBtn" onclick="openLoginModal()" class="text-[#888] hover:text-[#333] transition-colors">登录</button>
+        <div id="authSection" class="hidden">
+            <span id="userEmail" class="text-[#333]"></span>
+            <button id="logoutBtn" class="ml-4 text-[#d93025]">退出</button>
+        </div>
+    </div>
+
+    <!-- 登录弹窗 -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <h2 class="text-xl font-medium mb-4">开启您的专属档案</h2>
+            <p class="text-sm text-[#888] mb-6">为了替您生成专属的月末微光分析，我们需要为您建立一个加密的情绪档案。请使用邮箱一键开启（您的数据绝对私密）。</p>
+            <input id="emailInput" type="email" placeholder="请输入您的邮箱" class="w-full border p-2 rounded mb-4">
+            <div class="flex justify-end gap-4">
+                <button onclick="closeLoginModal()" class="text-[#888]">取消</button>
+                <button onclick="handleLogin()" class="bg-[#8BA88E] text-white px-6 py-2 rounded-lg">发送登录链接</button>
+            </div>
+        </div>
+    </div> 
   
       
   
@@ -260,7 +281,70 @@
   
   
   
-     <script> 
+     <script type="module">
+         import { supabase } from './supabaseClient.js';
+
+         // ... (我们原有的所有JS代码将放在这里)
+
+         // --- 4. 用户认证与UI更新 ---
+         const authSection = document.getElementById('authSection');
+         const userEmailSpan = document.getElementById('userEmail');
+         const loginBtn = document.getElementById('loginBtn');
+         const logoutBtn = document.getElementById('logoutBtn');
+         const loginModal = document.getElementById('loginModal');
+
+         // 检查当前用户状态并更新UI
+         async function checkUser() {
+             const { data: { user } } = await supabase.auth.getUser();
+             if (user) {
+                 authSection.classList.remove('hidden');
+                 userEmailSpan.textContent = user.email;
+                 loginBtn.classList.add('hidden');
+                 // 在这里可以添加逻辑，显示需要登录才能看到的内容
+             } else {
+                 logoutBtn.classList.add('hidden');
+             }
+         }
+
+         // 打开登录弹窗
+         window.openLoginModal = function() {
+             loginModal.classList.remove('hidden');
+         }
+
+         // 关闭登录弹窗
+         window.closeLoginModal = function() {
+             loginModal.classList.add('hidden');
+         }
+
+         // 处理Magic Link登录
+         window.handleLogin = async function() {
+             const email = document.getElementById('emailInput').value;
+             if (!email) {
+                 alert('请输入您的邮箱');
+                 return;
+             }
+             try {
+                 const { error } = await supabase.auth.signInWithOtp({
+                     email: email,
+                 });
+                 if (error) throw error;
+                 alert('请检查您的邮箱，点击收到的链接即可登录！');
+                 closeLoginModal();
+             } catch (error) {
+                 alert('登录失败: ' + error.message);
+             }
+         }
+
+         // 处理登出
+         logoutBtn.addEventListener('click', async () => {
+             await supabase.auth.signOut();
+             window.location.reload(); // 刷新页面以更新UI
+         });
+
+         // 页面加载时检查用户状态
+         document.addEventListener('DOMContentLoaded', checkUser);
+
+     </script> 
   
          // --- 1. 弹窗与档案管理逻辑 --- 
   
