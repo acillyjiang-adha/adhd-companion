@@ -73,10 +73,10 @@
                       placeholder="哪怕只是几个字也挺好的..."></textarea>
 
             <div class="absolute bottom-8 right-10 opacity-0 flex items-center gap-8" id="submitArea">
-                <button id="saveBtn" onclick="saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[13px] tracking-widest">
+                <button id="saveBtn" onclick="window.saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[13px] tracking-widest">
                     <span>默默封存</span>
                 </button>
-                <button id="submitBtn" onclick="startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[15px] tracking-widest font-medium group">
+                <button id="submitBtn" onclick="window.startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[15px] tracking-widest font-medium group">
                     <span id="btnText">听听回音</span>
                     <span id="btnArrow" class="text-lg group-hover:translate-x-1 transition-transform">→</span>
                 </button>
@@ -98,7 +98,7 @@
                     需要物理外挂？前往工具箱
                 </a>
                 <span class="text-xs text-[#8BA88E]/30">|</span>
-                <button onclick="openProfileModal()" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">
+                <button onclick="window.openProfileModal()" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">
                    孩子信息配置
                 </button>
             </div>
@@ -127,7 +127,7 @@
                     <input type="text" id="childDiagnosis" placeholder="如：ADHD伴随ODD，极度抗拒写作业" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
                 </div>
             </div>
-            <button onclick="saveProfileAndClose()" class="w-full mt-8 bg-[#8BA88E] text-white py-3 rounded-full font-medium tracking-wide hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300">
+            <button onclick="window.saveProfileAndClose()" class="w-full mt-8 bg-[#8BA88E] text-white py-3 rounded-full font-medium tracking-wide hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300">
                 保存信息
             </button>
         </div>
@@ -140,7 +140,6 @@
         提示信息
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         // --- [REFACTORED] Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -153,31 +152,7 @@
         let db, auth;
 
         // [FIX #1] Globally define the System Prompt Template to prevent "Can't find variable" error.
-        const SYSTEM_PROMPT_TEMPLATE = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。
-
-孩子叫“__CHILD_NAME__”，特质是“__CHILD_TRAIT__”。
-
-【⚠️ 危机干预最高指令——涉及生命安全时无条件触发】
-如果家长描述的内容包含以下任何一种极端情况：
-- 孩子有自残、自杀的言语或行为。
-- 孩子对他人使用严重的致命暴力或持械。
-- 家长本人表达了想要伤害自己、轻生或伤害他人的念头。
-你必须立刻【彻底放弃】所有的神经学分析和物理建议！在回复的最开头，强制使用以下包含HTML标签的红色加粗文字报警：
-<strong style="color: #d93025; font-size: 16px; display: block; margin-bottom: 15px;">⚠️ 安全提醒：您描述的情况已超出常规的情绪支持范畴，涉及生命安全。请立即优先保护您和孩子的生命安全！<br>请您立刻心理医生，寻求专业的人工危机干预。</strong>
-输出完这段红字后，用极其简短、克制的话语安抚家长当下的惊恐，告诉他们“现在的首要任务是确保安全，寻求专业医疗介入，不要试图自己独自解决”。【绝对不要】在这类回复中讲比喻或给出常规动作建议。
-
-【常规语法与表达红线——平时遵循】
-1.  【平实】：用词平实、温暖，不说教，不评判。多用短句。
-2.  【比喻】：核心比喻必须贯穿全文，且必须在第一段的“情绪接纳”环节就出现。
-3.  【不吞字】：确保语句流畅，绝对不能在任何地方出现吞字、漏字、语句不通顺的情况。
-4.  【无序号】：坚决不使用 1, 2, 3, 4... 或“首先、其次”之类的列表。
-
-【常规核心干预逻辑——平时遵循】
-你的回复严格遵循“情绪-躯体-行动-意义”四段式：
-1.  【情绪接纳】（约占20%）：先共情，用一个温柔的比喻接住家长的情绪。
-2.  【躯体感受】（约占30%）：引导家长关注自己的身体感受，从思维风暴中抽离。
-3.  【物理行动】（约占40%）：提供一个【极其简单、当下就能做】的微小物理“任务”。
-4.  【重塑意义】（约占10%）：用一两句话，为此事的发生赋予一个积极、微小的意义。`;
+        const SYSTEM_PROMPT_TEMPLATE = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。\n\n孩子叫“__CHILD_NAME__”，特质是“__CHILD_TRAIT__”。\n\n【⚠️ 危机干预最高指令——涉及生命安全时无条件触发】\n如果家长描述的内容包含以下任何一种极端情况：\n- 孩子有自残、自杀的言语或行为。\n- 孩子对他人使用严重的致命暴力或持械。\n- 家长本人表达了想要伤害自己、轻生或伤害他人的念头。\n你必须立刻【彻底放弃】所有的神经学分析和物理建议！在回复的最开头，强制使用以下包含HTML标签的红色加粗文字报警：\n<strong style="color: #d93025; font-size: 16px; display: block; margin-bottom: 15px;">⚠️ 安全提醒：您描述的情况已超出常规的情绪支持范畴，涉及生命安全。请立即优先保护您和孩子的生命安全！<br>请您立刻心理医生，寻求专业的人工危机干预。</strong>\n输出完这段红字后，用极其简短、克制的话语安抚家长当下的惊恐，告诉他们“现在的首要任务是确保安全，寻求专业医疗介入，不要试图自己独自解决”。【绝对不要】在这类回复中讲比喻或给出常规动作建议。\n\n【常规语法与表达红线——平时遵循】\n1.  【平实】：用词平实、温暖，不说教，不评判。多用短句。\n2.  【比喻】：核心比喻必须贯穿全文，且必须在第一段的“情绪接纳”环节就出现。\n3.  【不吞字】：确保语句流畅，绝对不能在任何地方出现吞字、漏字、语句不通顺的情况。\n4.  【无序号】：坚决不使用 1, 2, 3, 4... 或“首先、其次”之类的列表。\n\n【常规核心干预逻辑——平时遵循】\n你的回复严格遵循“情绪-躯体-行动-意义”四段式：\n1.  【情绪接纳】（约占20%）：先共情，用一个温柔的比喻接住家长的情绪。\n2.  【躯体感受】（约占30%）：引导家长关注自己的身体感受，从思维风暴中抽离。\n3.  【物理行动】（约占40%）：提供一个【极其简单、当下就能做】的微小物理“任务”。\n4.  【重塑意义】（约占10%）：用一两句话，为此事的发生赋予一个积极、微小的意义。`;
 
         // --- [REFACTORED] DOM Element Declarations ---
         let authStatusContainer, loginModal, profileModal, input, submitArea, responseContainer, outputText, bottomNav, welcomeText, profileCard, toast;
@@ -250,7 +225,7 @@
         }
 
         async function fetchDeepSeek(text) {
-            console.log("[MONITOR] 1. Entering fetchDeepSeek function.");
+            console.log("[DEBUG] 1. fetchDeepSeek started.");
 
             const childProfile = JSON.parse(localStorage.getItem('child_profile') || '{}');
             const childName = childProfile.name || '孩子';
@@ -261,7 +236,7 @@
                 .replace('__CHILD_TRAIT__', childTrait);
 
             const finalPrompt = systemPrompt || "你是一位温暖的心理支持助手，请尽力帮助用户。";
-            console.log("[MONITOR] 2. Final system prompt prepared:", finalPrompt);
+            console.log("[DEBUG] 2. System prompt prepared.");
 
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
@@ -275,7 +250,6 @@
                 outputText.innerHTML = '';
                 outputText.classList.add('typing-cursor');
                 
-                console.log("[MONITOR] 3. Sending request to /api/chat...");
                 const response = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -287,28 +261,20 @@
                         presence_penalty: 0 
                     })
                 });
-                console.log("[MONITOR] 4. Received response from /api/chat. Status:", response.status);
 
                 if (!response.ok) {
-                    console.error("[MONITOR] Response not OK. Status text:", response.statusText);
-                    throw new Error(`网络似乎在走神 (状态码: ${response.status})`);
+                    throw new Error(`网络服务异常 (状态码: ${response.status})`);
                 }
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
                 let fullReply = "";
 
-                console.log("[MONITOR] 5. Starting to read stream...");
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) {
-                        console.log("[MONITOR] 6. Stream finished.");
-                        break;
-                    }
+                    if (done) break;
 
                     const chunk = decoder.decode(value, { stream: true });
-                    console.log("[MONITOR] 5a. Received stream chunk:", chunk);
-
                     const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
                     for (const line of lines) {
@@ -320,29 +286,39 @@
                                     fullReply += data.choices[0].delta.content;
                                 }
                             } catch (e) {
-                                console.error("Failed to parse JSON from stream:", line, e);
+                                console.error("[DEBUG] Stream JSON parsing error:", line, e);
                             }
                         }
                     }
-                    outputText.innerHTML = fullReply.replace(/\s*$$EMOTION_TAG: (\{.*?\})$$/, '').trim();
+                    // Interim update for live display, but without tag parsing.
+                    outputText.innerHTML = fullReply;
                 }
-                console.log("[MONITOR] 7. Full reply constructed:", fullReply);
 
-                // [FIX #3] Robustly parse the emotion tag with a try-catch block.
-                let emotionTag = null;
-                const tagRegex = /\s*$$EMOTION_TAG: (\{.*?\})$$/;
-                const match = fullReply.match(tagRegex);
+                // [FIX #1] Log the complete raw data from DeepSeek.
+                console.log("[DEBUG] 3. DeepSeek 原始返回数据:", fullReply);
+
+                // [FIX #2] Implement robust tag parsing with a fallback.
                 let cleanReply = fullReply;
+                let emotionTag = null;
+                const tagRegex = /\s*\$\$EMOTION_TAG: (\{.*?\})$/;
+                const match = fullReply.match(tagRegex);
+
+                // First, unconditionally display the full text to avoid blank screen.
+                outputText.innerHTML = fullReply;
 
                 if (match && match[1]) {
                     try {
                         emotionTag = JSON.parse(match[1]);
                         cleanReply = fullReply.replace(tagRegex, '').trim();
+                        // If parsing is successful, update the UI with the cleaned text.
                         outputText.innerHTML = cleanReply;
-                        console.log("[MONITOR] 8. Emotion tag parsed successfully.");
+                        console.log("[DEBUG] 4. Emotion tag parsed successfully:", emotionTag);
                     } catch (e) {
-                        console.error("Failed to parse final emotion tag:", e);
+                        console.error("[DEBUG] Emotion tag parsing failed, but full reply is displayed.", e);
+                        // If parsing fails, do nothing. The full reply is already on screen.
                     }
+                } else {
+                    console.log("[DEBUG] 4a. No emotion tag found in response.");
                 }
                 
                 if (currentUser) {
@@ -350,8 +326,9 @@
                 }
 
             } catch (error) {
-                console.error("[MONITOR] CRITICAL ERROR in fetchDeepSeek:", error);
-                outputText.innerHTML = `抱歉，微光未能及时照达。<br>${error.message}`;
+                // [FIX #3] Strengthened error catching.
+                console.error("[DEBUG] CRITICAL ERROR in fetchDeepSeek:", error);
+                outputText.innerHTML = `抱歉，接口连接失败，请稍后再试。<br><span style="font-size: 12px; color: #999;">技术细节: ${error.message}</span>`;
             } finally {
                 outputText.classList.remove('typing-cursor');
                 if(submitBtn) {
@@ -360,7 +337,7 @@
                 }
                 input.disabled = false;
                 setTimeout(() => { bottomNav.style.opacity = '1'; }, 800);
-                console.log("[MONITOR] 9. fetchDeepSeek finished.");
+                console.log("[DEBUG] 5. fetchDeepSeek finished.");
             }
         }
 
