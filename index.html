@@ -277,7 +277,103 @@
             }
         }
 
-        // ... (其他辅助函数，如 openLoginModal, saveProfileAndClose 等) ...
+        // --- 公开到全局的函数，供 HTML onclick 调用 ---
+        window.openProfileModal = function() {
+            const savedProfile = localStorage.getItem('child_profile');
+            if (savedProfile) {
+                try {
+                    const profileData = JSON.parse(savedProfile);
+                    document.getElementById('childAge').value = profileData.age || '';
+                    document.getElementById('childGender').value = profileData.gender || '男孩';
+                    document.getElementById('childDiagnosis').value = profileData.diagnosis || '';
+                } catch(e) {
+                    localStorage.removeItem('child_profile');
+                }
+            }
+            profileModal.classList.remove('hidden');
+            setTimeout(() => {
+                profileModal.classList.remove('opacity-0');
+                document.getElementById('profileCard').classList.remove('scale-95');
+            }, 10);
+        }
+
+        window.saveProfileAndClose = function() {
+             const profileData = {
+                age: document.getElementById('childAge').value || '未知年龄',
+                gender: document.getElementById('childGender').value,
+                diagnosis: document.getElementById('childDiagnosis').value || '未填写具体特质'
+             };
+             localStorage.setItem('child_profile', JSON.stringify(profileData));
+
+             profileModal.classList.add('opacity-0');
+             document.getElementById('profileCard').classList.add('scale-95');
+
+             setTimeout(() => {
+                 profileModal.classList.add('hidden');
+                 showToast("孩子信息已安妥保存");
+             }, 300);
+        }
+
+        window.saveSilently = function() {
+            const userText = input.value.trim();
+            if(!userText) return;
+            saveToLocal(userText);
+            transformStage();
+            outputText.innerHTML = "情绪已安放。<br>没有评判，只有接纳。";
+            setTimeout(() => { bottomNav.style.opacity = '1'; }, 800);
+        }
+
+        window.startAIAnalysis = async function() {
+            const userText = input.value.trim();
+            if(!userText) return;
+            saveToLocal(userText);
+            transformStage();
+            await fetchDeepSeek(userText);
+        }
+
+        // --- 内部函数 ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.transform = 'translateY(-100%)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        function transformStage() {
+            const welcome = document.getElementById('welcomeText');
+            const mainContainer = document.getElementById('mainContainer');
+            const responseContainer = document.getElementById('responseContainer');
+            welcome.classList.add('hidden-collapse');
+            mainContainer.classList.remove('mt-auto','mb-auto');
+            mainContainer.classList.add('mt-12');
+            responseContainer.classList.add('expanded');
+        }
+
+        function saveToLocal(text) {
+            let diaries = JSON.parse(localStorage.getItem('adhd_diaries') || '[]');
+            diaries.push({ date: new Date().toISOString(), content: text });
+            localStorage.setItem('adhd_diaries', JSON.stringify(diaries));
+        }
+
+        // 输入框交互
+        const welcome = document.getElementById('welcomeText');
+        input.addEventListener('focus', () => welcome.classList.add('dimmed'));
+        input.addEventListener('blur', () => {
+            if(input.value.trim() === '') welcome.classList.remove('dimmed');
+        });
+        input.addEventListener('input', () => {
+            submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0';
+        });
+
+        // 首次加载检查配置
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedProfile = localStorage.getItem('child_profile');
+            if (!savedProfile) { window.openProfileModal(); }
+        });
 
     </script>
 </body>
