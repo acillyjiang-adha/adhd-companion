@@ -235,12 +235,12 @@
 
         // --- 流式 Fetch 函数 ---
         async function fetchDeepSeek(text) {
-            // ... (此处省略 systemPrompt 的构建) ...
+            // ... (systemPrompt 构建部分保持不变) ...
             try {
                 const response = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ messages: [{ role: "system", content: "..." }, { role: "user", content: text }] })
+                    body: JSON.stringify({ messages: [{ role: "system", content: systemPrompt }, { role: "user", content: text }], stream: true })
                 });
 
                 if (!response.ok) throw new Error('网络似乎在走神');
@@ -249,10 +249,12 @@
                 const decoder = new TextDecoder('utf-8');
                 outputText.innerHTML = "";
                 let fullReply = "";
+                let emotionTag = null;
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
+
                     const chunk = decoder.decode(value, { stream: true });
                     const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
@@ -263,17 +265,50 @@
                                 const data = JSON.parse(line.slice(6));
                                 if (data.choices && data.choices[0].delta.content) {
                                     fullReply += data.choices[0].delta.content;
-                                    outputText.innerHTML = fullReply;
                                 }
-                            } catch (e) { console.error("解析数据块失败:", e); }
+                            } catch (e) {
+                                console.error("解析数据流中的JSON失败:", line, e);
+                            }
                         }
                     }
+                    // 实时更新UI，即使有解析错误，已收到的内容也能显示
+                    outputText.innerHTML = fullReply;
                 }
-                await saveInteraction(text, fullReply, null);
+
+                // --- 【修复核心】 --- 
+                // 1. 在完整的回复上进行一次性的、带容错的标签解析
+                const tagRegex = /\s*\[EMOTION_TAG: (\{.*?\})\]/;
+                const match = fullReply.match(tagRegex);
+                let cleanReply = fullReply;
+
+                if (match && match[1]) {
+                    try {
+                        emotionTag = JSON.parse(match[1]);
+                        // 从UI上彻底删除技术标签
+                        cleanReply = fullReply.replace(tagRegex, '').trim();
+                        outputText.innerHTML = cleanReply; // 更新UI为清理后的文本
+                    } catch (e) {
+                        console.error("最终情绪标签解析失败，但回复仍将显示: ", e);
+                        // 解析失败，cleanReply 保持为 fullReply，UI上可能残留未解析的TAG，但不会崩溃
+                    }
+                }
+
+                // 2. 将存储操作解耦，异步执行不阻塞UI
+                saveInteraction(text, cleanReply, emotionTag);
+
             } catch (error) {
                 outputText.innerHTML = `抱歉，微光未能及时照达。${error.message}`;
+                console.error(error);
             } finally {
-                // ... (恢复按钮状态的逻辑) ...
+                outputText.classList.remove('typing-cursor');
+                // 恢复按钮状态
+                const submitBtn = document.querySelector('button[onclick="startAIAnalysis()"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = "听听回音";
+                    submitBtn.disabled = false;
+                }
+                input.disabled = false;
+                if(actionNav) actionNav.style.opacity = '1';
             }
         }
 
