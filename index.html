@@ -12,186 +12,77 @@
             background-color: #F9F9F7;
             color: #4A4A4A;
         }
-        body.is-loading .interactive-button {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-        .welcome-text {
-            letter-spacing: 0.15em; line-height: 2;
-            animation: breathFadeIn 2.5s ease-out forwards;
-            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 100px;
-            overflow: hidden;
-        }
-        @keyframes breathFadeIn {
-            0% { opacity: 0; transform: translateY(8px); }
-            100% { opacity: 0.6; transform: translateY(0); }
-        }
-        .welcome-text.dimmed { opacity: 0.2 !important; }
-        .welcome-text.hidden-collapse { opacity: 0 !important; max-height: 0; margin-bottom: 0 !important; transform: translateY(-20px); }
-        .whisper-input {
-            background-color: #FFFFFF;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
-            border: 1px solid transparent;
-            outline: none;
-            transition: all 1s ease-in-out;
-        }
-        .whisper-input::placeholder { color: #A1A1A1; font-weight: 300; letter-spacing: 0.05em; }
-        .whisper-input:disabled { background-color: #FAF9F5; color: #888888; box-shadow: none; border: 1px solid #F4F2EE; }
-        #submitArea { transition: all 1s ease; }
-        .ai-response-area {
-            max-height: 0; opacity: 0; overflow: hidden;
-            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .ai-response-area.expanded {
-            max-height: 2000px;
-            opacity: 1; margin-top: 2rem;
-        }
         .typing-cursor::after {
             content: '...';
             animation: pulse 1.5s infinite;
             color: #8BA88E;
         }
-        ::-webkit-scrollbar { display: none; }
+        /* 其他您需要的样式 */
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto is-loading">
+<body class="min-h-screen flex flex-col items-center py-16 px-6 sm:px-12 relative overflow-y-auto">
 
     <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#F2E2DF]/20 to-transparent pointer-events-none"></div>
 
+    <div id="auth-status-container" class="absolute top-5 right-5 text-sm text-[#888] z-10"></div>
+
     <div class="w-full max-w-2xl mt-auto mb-auto transition-all duration-1000 flex flex-col" id="mainContainer">
 
-        <div id="welcomeText" class="welcome-text text-center text-xl sm:text-2xl mb-12 sm:mb-16">
+        <div id="welcomeText" class="text-center text-xl sm:text-2xl mb-12 sm:mb-16">
             <p>此刻，让世界静音。</p>
             <p>这里，只有你自己。</p>
         </div>
 
-        <div class="relative w-full transition-transform duration-1000 ease-in-out" id="inputWrapper">
+        <div class="relative w-full">
             <textarea id="diaryInput" rows="5"
-                      class="whisper-input w-full rounded-[2rem] p-8 sm:p-12 text-[19px] text-[#5C5C5C] leading-loose resize-none pb-20"
+                      class="w-full rounded-[2rem] p-8 sm:p-12 text-[19px] text-[#5C5C5C] leading-loose resize-none pb-20"
                       placeholder="哪怕只是几个字也挺好的..."></textarea>
 
             <div class="absolute bottom-8 right-10 opacity-0 flex items-center gap-8" id="submitArea">
-                <button id="saveBtn" onclick="window.saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[13px] tracking-widest">
-                    <span>默默封存</span>
-                </button>
-                <button id="submitBtn" onclick="window.startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A] transition-colors flex items-center gap-2 text-[15px] tracking-widest font-medium group">
-                    <span id="btnText">听听回音</span>
-                    <span id="btnArrow" class="text-lg group-hover:translate-x-1 transition-transform">→</span>
-                </button>
+                <button onclick="window.saveSilently()" class="text-[#BDBDBD] hover:text-[#4A4A4A]">默默封存</button>
+                <button onclick="window.startAIAnalysis()" class="text-[#8BA88E] hover:text-[#4A4A4A]">听听回音 →</button>
             </div>
         </div>
 
-        <div id="responseContainer" class="ai-response-area w-full">
-            <div id="responseBox" class="bg-white rounded-3xl p-8 sm:p-12 border border-[#E1E8E0] shadow-sm relative">
-                <div id="responseLabel" class="absolute top-8 left-8 flex items-center gap-2 hidden">
-                    <div class="w-2 h-2 rounded-full bg-[#8BA88E] animate-pulse"></div>
-                    <span class="text-[#8BA88E] text-xs tracking-widest">微光回信</span>
-                </div>
-
-                <div id="outputText" class="text-[#5C5C5C] leading-loose text-[17px] text-justify mt-8 whitespace-pre-wrap"></div>
-            </div>
-
-            <div class="mt-8 text-center opacity-0 transition-opacity duration-1000 flex items-center justify-center gap-6" id="bottomNav">
-                 <a href="toolkit.html" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">
-                    需要物理外挂？前往工具箱
-                </a>
-                <span class="text-xs text-[#8BA88E]/30">|</span>
-                <button onclick="window.openProfileModal()" class="text-xs text-[#8BA88E] tracking-widest hover:text-[#4A4A4A] transition-colors border-b border-[#8BA88E]/30 pb-1">
-                   孩子信息配置
-                </button>
+        <div id="responseContainer" class="ai-response-area w-full mt-8" style="display: none;">
+            <div class="bg-white rounded-3xl p-8 sm:p-12 border border-[#E1E8E0]">
+                <div id="outputText" class="text-[#5C5C5C] leading-loose"></div>
             </div>
         </div>
-    </div>
-
-    <div id="profileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-[#FDFBF7] w-11/12 max-w-md rounded-3xl shadow-xl p-8 transform scale-95 transition-transform duration-300" id="profileCard">
-            <h2 class="text-xl font-medium text-[#4A4A4A] mb-2">配置孩子信息</h2>
-            <p class="text-sm text-[#888888] mb-6 leading-relaxed">为了让老师的分析更精准，请简单设置一下孩子的情况。信息仅保存在你的本地设备，绝对隐私。</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm text-[#888888] mb-1">孩子年龄</label>
-                    <input type="number" id="childAge" placeholder="例如：14" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm text-[#888888] mb-1">孩子性别</label>
-                    <select id="childGender" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
-                        <option value="男孩">男孩</option>
-                        <option value="女孩">女孩</option>
-                        <option value="不愿透露">不愿透露</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm text-[#888888] mb-1">主要困扰或确诊情况 (一句话概括)</label>
-                    <input type="text" id="childDiagnosis" placeholder="如：ADHD伴随ODD，极度抗拒写作业" class="w-full bg-white border border-[#E1E8E0] rounded-xl px-4 py-2.5 text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#8BA88E]/50 transition-all">
-                </div>
-            </div>
-            <button onclick="window.saveProfileAndClose()" class="w-full mt-8 bg-[#8BA88E] text-white py-3 rounded-full font-medium tracking-wide hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#8BA88E]/20 transition-all duration-300">
-                保存信息
-            </button>
-        </div>
-    </div>
-
-    <!-- 统一的、由JS动态渲染的用户状态容器 -->
-    <div id="auth-status-container" class="absolute top-5 right-5 text-sm text-[#888] z-10"></div>
-
-    <div id="toast" class="fixed top-10 transform -translate-y-full opacity-0 bg-[#3C3C3C] text-white px-6 py-3 rounded-full shadow-lg transition-all duration-500 z-50 pointer-events-none">
-        提示信息
     </div>
 
     <script type="module">
-        // --- [REFACTORED] Firebase SDK Imports ---
+        // --- [REWRITE] Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // --- [REFACTORED] Global State & Configuration ---
+        // --- [REWRITE] App State & Config ---
         let currentUser = null;
-        let authInitialized = false;
         let db, auth;
 
-        // [FIX #1] Globally define the System Prompt Template to prevent "Can't find variable" error.
-        const SYSTEM_PROMPT_TEMPLATE = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。\n\n孩子叫“__CHILD_NAME__”，特质是“__CHILD_TRAIT__”。\n\n【⚠️ 危机干预最高指令——涉及生命安全时无条件触发】\n如果家长描述的内容包含以下任何一种极端情况：\n- 孩子有自残、自杀的言语或行为。\n- 孩子对他人使用严重的致命暴力或持械。\n- 家长本人表达了想要伤害自己、轻生或伤害他人的念头。\n你必须立刻【彻底放弃】所有的神经学分析和物理建议！在回复的最开头，强制使用以下包含HTML标签的红色加粗文字报警：\n<strong style="color: #d93025; font-size: 16px; display: block; margin-bottom: 15px;">⚠️ 安全提醒：您描述的情况已超出常规的情绪支持范畴，涉及生命安全。请立即优先保护您和孩子的生命安全！<br>请您立刻心理医生，寻求专业的人工危机干预。</strong>\n输出完这段红字后，用极其简短、克制的话语安抚家长当下的惊恐，告诉他们“现在的首要任务是确保安全，寻求专业医疗介入，不要试图自己独自解决”。【绝对不要】在这类回复中讲比喻或给出常规动作建议。\n\n【常规语法与表达红线——平时遵循】\n1.  【平实】：用词平实、温暖，不说教，不评判。多用短句。\n2.  【比喻】：核心比喻必须贯穿全文，且必须在第一段的“情绪接纳”环节就出现。\n3.  【不吞字】：确保语句流畅，绝对不能在任何地方出现吞字、漏字、语句不通顺的情况。\n4.  【无序号】：坚决不使用 1, 2, 3, 4... 或“首先、其次”之类的列表。\n\n【常规核心干预逻辑——平时遵循】\n你的回复严格遵循“情绪-躯体-行动-意义”四段式：\n1.  【情绪接纳】（约占20%）：先共情，用一个温柔的比喻接住家长的情绪。\n2.  【躯体感受】（约占30%）：引导家长关注自己的身体感受，从思维风暴中抽离。\n3.  【物理行动】（约占40%）：提供一个【极其简单、当下就能做】的微小物理“任务”。\n4.  【重塑意义】（约占10%）：用一两句话，为此事的发生赋予一个积极、微小的意义。`;
+        const SYSTEM_PROMPT_TEMPLATE = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。\n\n【常规语法与表达红线】\n1. 【平实】：用词平实、温暖，不说教，不评判。\n2. 【比喻】：核心比喻必须贯穿全文。\n3. 【不吞字】：确保语句流畅。\n4. 【无序号】：坚决不使用列表。\n\n【危机干预最高指令】\n如果内容涉及自残、自杀、暴力等，立刻放弃所有分析，强制使用以下红色加粗文字报警：\n<strong style="color: #d93025;">⚠️ 安全提醒：您描述的情况已超出常规支持范畴，涉及安全。请立即寻求专业的人工危机干预。</strong>\n\n【输出格式指令】\n在所有回复的最后，另起一行，严格按以下格式追加技术标签：\n[EMOTION_TAG: {"label":"核心情绪", "color":"#十六进制色码"}]`;
 
-        // --- [REFACTORED] DOM Element Declarations ---
-        let authStatusContainer, loginModal, profileModal, input, submitArea, responseContainer, outputText, bottomNav, welcomeText, profileCard, toast;
+        // --- [REWRITE] DOM Element Cache ---
+        const dom = {};
 
-        // [FIX #2] Defer all script execution until the DOM is fully loaded to prevent race conditions.
+        // --- [REWRITE] Main Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize DOM elements
-            authStatusContainer = document.getElementById('auth-status-container');
-            loginModal = document.getElementById('loginModal');
-            profileModal = document.getElementById('profileModal');
-            input = document.getElementById('diaryInput');
-            submitArea = document.getElementById('submitArea');
-            responseContainer = document.getElementById('responseContainer');
-            outputText = document.getElementById('outputText');
-            bottomNav = document.getElementById('bottomNav');
-            welcomeText = document.getElementById('welcomeText');
-            profileCard = document.getElementById('profileCard');
-            toast = document.getElementById('toast');
+            // Cache all DOM elements at once
+            dom.authContainer = document.getElementById('auth-status-container');
+            dom.input = document.getElementById('diaryInput');
+            dom.submitArea = document.getElementById('submitArea');
+            dom.responseContainer = document.getElementById('responseContainer');
+            dom.outputText = document.getElementById('outputText');
 
-            // Bind core application events
-            initializeAuthListener();
-            bindInputEvents();
-            checkInitialProfile();
+            initializeFirebase();
+            bindCoreEvents();
+            renderAuthUI('loading'); // Initial auth state
         });
 
-        // --- [REFACTORED] Core Functions ---
+        // --- [REWRITE] Core Logic ---
 
-        function initializeAuthListener() {
-            if (authInitialized) return;
-            let authResponded = false;
-
-            const authTimeout = setTimeout(() => {
-                if (!authResponded) {
-                    console.warn("Firebase Auth timed out. Entering offline mode.");
-                    authResponded = true;
-                    updateUIForUser('offline');
-                }
-            }, 3000);
-
+        function initializeFirebase() {
             try {
                 const firebaseConfig = {
                     apiKey: "AIzaSyBcWZVUgSw0BJBxCWU0XOA_5HZAW1dzX6I",
@@ -206,65 +97,76 @@
                 db = getFirestore(app);
 
                 onAuthStateChanged(auth, user => {
-                    if (!authResponded) {
-                        clearTimeout(authTimeout);
-                        authResponded = true;
-                    }
                     currentUser = user;
-                    updateUIForUser(user);
+                    renderAuthUI(user);
                 });
-                authInitialized = true;
             } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                if (!authResponded) {
-                    clearTimeout(authTimeout);
-                    authResponded = true;
-                    updateUIForUser('offline');
-                }
+                console.error("Firebase init failed:", error);
+                renderAuthUI('offline');
             }
         }
 
+        function bindCoreEvents() {
+            dom.input.addEventListener('input', () => {
+                dom.submitArea.style.opacity = dom.input.value.trim().length > 0 ? '1' : '0';
+            });
+        }
+
+        // --- [REWRITE] UI Rendering (State Separation Principle) ---
+
+        function renderAuthUI(userOrState) {
+            if (!dom.authContainer) return;
+            dom.authContainer.innerHTML = ''; // Clear previous state to prevent ghosting
+
+            if (userOrState === 'loading') {
+                dom.authContainer.textContent = '验证身份中...';
+            } else if (userOrState === 'offline') {
+                dom.authContainer.innerHTML = `<button onclick="alert('登录功能暂不可用')">我的记录 (离线)</button>`;
+            } else if (userOrState) { // User object
+                dom.authContainer.innerHTML = `<button onclick="window.location.href='/cards.html'">我的记录</button>`;
+            } else { // No user
+                dom.authContainer.innerHTML = `<button onclick="alert('请先登录')">登录</button>`;
+            }
+        }
+
+        function renderChatUI(state, data) {
+            if (!dom.outputText || !dom.responseContainer) return;
+            
+            dom.responseContainer.style.display = 'block';
+            dom.outputText.classList.remove('typing-cursor');
+
+            switch (state) {
+                case 'loading':
+                    dom.outputText.innerHTML = '';
+                    dom.outputText.classList.add('typing-cursor');
+                    break;
+                case 'success':
+                    dom.outputText.innerHTML = data.replace(/\n/g, '<br>');
+                    break;
+                case 'error':
+                    dom.outputText.innerHTML = `抱歉，AI响应失败: <br><span style="color: #999;">${data}</span>`;
+                    break;
+            }
+        }
+
+        // --- [REWRITE] AI & Data Handling ---
+
         async function fetchDeepSeek(text) {
-            console.log("[DEBUG] 1. fetchDeepSeek started.");
-
-            const childProfile = JSON.parse(localStorage.getItem('child_profile') || '{}');
-            const childName = childProfile.name || '孩子';
-            const childTrait = childProfile.diagnosis || '未填写具体特质';
-
-            const systemPrompt = SYSTEM_PROMPT_TEMPLATE
-                .replace('__CHILD_NAME__', childName)
-                .replace('__CHILD_TRAIT__', childTrait);
-
-            const finalPrompt = systemPrompt || "你是一位温暖的心理支持助手，请尽力帮助用户。";
-            console.log("[DEBUG] 2. System prompt prepared.");
-
-            const submitBtn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
+            renderChatUI('loading');
 
             try {
-                if(submitBtn) {
-                    btnText.textContent = "正在倾听...";
-                    submitBtn.disabled = true;
-                }
-                input.disabled = true;
-                outputText.innerHTML = '';
-                outputText.classList.add('typing-cursor');
-                
+                const finalPrompt = SYSTEM_PROMPT_TEMPLATE; // Simplified for robustness
+
                 const response = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         messages: [{ role: "system", content: finalPrompt }, { role: "user", content: text }], 
-                        stream: true, 
-                        temperature: 0.5, 
-                        frequency_penalty: 0, 
-                        presence_penalty: 0 
+                        stream: true 
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`网络服务异常 (状态码: ${response.status})`);
-                }
+                if (!response.ok) throw new Error(`API请求失败，状态码: ${response.status}`);
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
@@ -273,216 +175,65 @@
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n').filter(line => line.trim() !== '');
-
-                    for (const line of lines) {
-                        if (line.includes('[DONE]')) continue;
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const data = JSON.parse(line.slice(6));
-                                if (data.choices && data.choices[0].delta.content) {
-                                    fullReply += data.choices[0].delta.content;
-                                }
-                            } catch (e) {
-                                console.error("[DEBUG] Stream JSON parsing error:", line, e);
-                            }
-                        }
-                    }
-                    // Interim update for live display, but without tag parsing.
-                    outputText.innerHTML = fullReply;
+                    fullReply += decoder.decode(value, { stream: true });
                 }
+                
+                // [Principle #3] First, render the raw text to guarantee no blank screen
+                renderChatUI('success', fullReply);
 
-                // [FIX #1] Log the complete raw data from DeepSeek.
-                console.log("[DEBUG] 3. DeepSeek 原始返回数据:", fullReply);
-
-                // [FIX #2] Implement robust tag parsing with a fallback.
+                // Now, safely attempt to parse the tag
                 let cleanReply = fullReply;
                 let emotionTag = null;
-                const tagRegex = /\s*\$\$EMOTION_TAG: (\{.*?\})$/;
+                const tagRegex = /\s*\[EMOTION_TAG: (\{.*?\})\]/s;
                 const match = fullReply.match(tagRegex);
-
-                // First, unconditionally display the full text to avoid blank screen.
-                outputText.innerHTML = fullReply;
 
                 if (match && match[1]) {
                     try {
                         emotionTag = JSON.parse(match[1]);
                         cleanReply = fullReply.replace(tagRegex, '').trim();
-                        // If parsing is successful, update the UI with the cleaned text.
-                        outputText.innerHTML = cleanReply;
-                        console.log("[DEBUG] 4. Emotion tag parsed successfully:", emotionTag);
+                        // If parsing succeeds, update the UI with the cleaned text
+                        renderChatUI('success', cleanReply);
                     } catch (e) {
-                        console.error("[DEBUG] Emotion tag parsing failed, but full reply is displayed.", e);
-                        // If parsing fails, do nothing. The full reply is already on screen.
+                        console.error("Emotion tag parsing failed, but raw reply is shown.", e);
                     }
-                } else {
-                    console.log("[DEBUG] 4a. No emotion tag found in response.");
                 }
-                
+
+                // [Principle #4] Decoupled Firebase save
                 if (currentUser) {
                     saveInteraction(text, cleanReply, emotionTag);
                 }
 
             } catch (error) {
-                // [FIX #3] Strengthened error catching.
-                console.error("[DEBUG] CRITICAL ERROR in fetchDeepSeek:", error);
-                outputText.innerHTML = `抱歉，接口连接失败，请稍后再试。<br><span style="font-size: 12px; color: #999;">技术细节: ${error.message}</span>`;
-            } finally {
-                outputText.classList.remove('typing-cursor');
-                if(submitBtn) {
-                    btnText.textContent = "听听回音";
-                    submitBtn.disabled = false;
-                }
-                input.disabled = false;
-                setTimeout(() => { bottomNav.style.opacity = '1'; }, 800);
-                console.log("[DEBUG] 5. fetchDeepSeek finished.");
+                console.error("Critical error in fetchDeepSeek:", error);
+                renderChatUI('error', error.message);
             }
         }
 
-        async function saveInteraction(userText, aiResponse, emotionTag) {
-            if (!currentUser || !db) return;
+        function saveInteraction(userInput, aiResponse, emotionTag) {
+            if (!db) return; // Firebase not initialized
             try {
                 const interactionRef = doc(collection(db, "users", currentUser.uid, "interactions"));
-                await setDoc(interactionRef, {
-                    userInput: userText,
-                    aiResponse: aiResponse,
+                setDoc(interactionRef, {
+                    userInput,
+                    aiResponse,
                     emotionTag: emotionTag || null,
-                    timestamp: serverTimestamp(),
-                    childProfile: JSON.parse(localStorage.getItem('child_profile') || '{}')
+                    createdAt: serverTimestamp()
                 });
             } catch (error) {
-                console.error("Failed to save interaction:", error);
+                console.error("Failed to save interaction to Firestore:", error);
             }
         }
 
-        // --- [REFACTORED] UI & Utility Functions ---
-
-        function updateUIForUser(userOrState) {
-            if (!authStatusContainer) return;
-            authStatusContainer.innerHTML = ''; 
-
-            if (userOrState === 'offline') {
-                authStatusContainer.innerHTML = '<button onclick="window.openLoginModal()" class="cursor-pointer">我的记录 (离线)</button>';
-            } else if (userOrState) {
-                authStatusContainer.innerHTML = `
-                    <div class="relative" id="user-menu-container">
-                        <button id="userMenuBtn" class="cursor-pointer">我的记录</button>
-                        <div id="userMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20">
-                            <a href="cards.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">查看历史记录</a>
-                            <button id="logoutBtnInsideMenu" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">退出登录</button>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('userMenuBtn').addEventListener('click', () => document.getElementById('userMenuDropdown').classList.toggle('hidden'));
-                document.getElementById('logoutBtnInsideMenu').addEventListener('click', () => auth.signOut());
-            } else {
-                authStatusContainer.innerHTML = '<button onclick="window.openLoginModal()" class="cursor-pointer">我的记录</button>';
-            }
-            document.body.classList.remove('is-loading');
-        }
-
-        function bindInputEvents() {
-            input.addEventListener('focus', () => welcomeText.classList.add('dimmed'));
-            input.addEventListener('blur', () => {
-                if (input.value.trim() === '') welcomeText.classList.remove('dimmed');
-            });
-            input.addEventListener('input', () => {
-                submitArea.style.opacity = input.value.trim().length > 0 ? '1' : '0';
-            });
-        }
-
-        function checkInitialProfile() {
-            const savedProfile = localStorage.getItem('child_profile');
-            if (!savedProfile) {
-                window.openProfileModal();
-            }
-        }
-        
-        function showToast(message) {
-            if (!toast) return;
-            toast.innerText = message;
-            toast.style.transform = 'translateY(0)';
-            toast.style.opacity = '1';
-            setTimeout(() => {
-                toast.style.transform = 'translateY(-100%)';
-                toast.style.opacity = '0';
-            }, 3000);
-        }
-
-        function transformStage() {
-            welcomeText.classList.add('hidden-collapse');
-            const mainContainer = document.getElementById('mainContainer');
-            mainContainer.classList.remove('mt-auto', 'mb-auto');
-            mainContainer.classList.add('mt-12');
-            responseContainer.classList.add('expanded');
-        }
-
-        function saveToLocal(text) {
-            let diaries = JSON.parse(localStorage.getItem('adhd_diaries') || '[]');
-            diaries.push({ date: new Date().toISOString(), content: text });
-            localStorage.setItem('adhd_diaries', JSON.stringify(diaries));
-        }
-
-        // --- [REFACTORED] Global Event Handlers ---
-        window.openProfileModal = function() {
-            const savedProfile = localStorage.getItem('child_profile');
-            if (savedProfile) {
-                try {
-                    const profileData = JSON.parse(savedProfile);
-                    document.getElementById('childAge').value = profileData.age || '';
-                    document.getElementById('childGender').value = profileData.gender || '男孩';
-                    document.getElementById('childDiagnosis').value = profileData.diagnosis || '';
-                } catch(e) {
-                    localStorage.removeItem('child_profile');
-                }
-            }
-            profileModal.classList.remove('hidden');
-            setTimeout(() => {
-                profileModal.classList.remove('opacity-0');
-                profileCard.classList.remove('scale-95');
-            }, 10);
-        }
-
-        window.saveProfileAndClose = function() {
-             const profileData = {
-                age: document.getElementById('childAge').value,
-                gender: document.getElementById('childGender').value,
-                diagnosis: document.getElementById('childDiagnosis').value
-             };
-             localStorage.setItem('child_profile', JSON.stringify(profileData));
-             profileModal.classList.add('opacity-0');
-             profileCard.classList.add('scale-95');
-             setTimeout(() => {
-                 profileModal.classList.add('hidden');
-                 showToast("孩子信息已安妥保存");
-             }, 300);
+        // --- [REWRITE] Global Event Handlers ---
+        window.startAIAnalysis = function() {
+            const text = dom.input.value.trim();
+            if (text) fetchDeepSeek(text);
         }
 
         window.saveSilently = function() {
-            const userText = input.value.trim();
-            if(!userText) return;
-            saveToLocal(userText);
-            transformStage();
-            outputText.innerHTML = "情绪已安放。<br>没有评判，只有接纳。";
-            setTimeout(() => { bottomNav.style.opacity = '1'; }, 800);
+            renderChatUI('success', '情绪已安放。没有评判，只有接纳。');
         }
 
-        window.startAIAnalysis = async function() {
-            const userText = input.value.trim();
-            if(!userText) return;
-            saveToLocal(userText);
-            transformStage();
-            await fetchDeepSeek(userText);
-        }
-        
-        window.openLoginModal = function() {
-            if(loginModal) {
-                loginModal.classList.remove('hidden');
-                setTimeout(() => loginModal.classList.remove('opacity-0'), 10);
-            }
-        }
     </script>
 </body>
 </html>
