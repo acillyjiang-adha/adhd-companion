@@ -250,6 +250,8 @@
         }
 
         async function fetchDeepSeek(text) {
+            console.log("[MONITOR] 1. Entering fetchDeepSeek function.");
+
             const childProfile = JSON.parse(localStorage.getItem('child_profile') || '{}');
             const childName = childProfile.name || '孩子';
             const childTrait = childProfile.diagnosis || '未填写具体特质';
@@ -259,6 +261,7 @@
                 .replace('__CHILD_TRAIT__', childTrait);
 
             const finalPrompt = systemPrompt || "你是一位温暖的心理支持助手，请尽力帮助用户。";
+            console.log("[MONITOR] 2. Final system prompt prepared:", finalPrompt);
 
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
@@ -272,6 +275,7 @@
                 outputText.innerHTML = '';
                 outputText.classList.add('typing-cursor');
                 
+                console.log("[MONITOR] 3. Sending request to /api/chat...");
                 const response = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -283,22 +287,32 @@
                         presence_penalty: 0 
                     })
                 });
+                console.log("[MONITOR] 4. Received response from /api/chat. Status:", response.status);
 
-                if (!response.ok) throw new Error('网络似乎在走神');
+                if (!response.ok) {
+                    console.error("[MONITOR] Response not OK. Status text:", response.statusText);
+                    throw new Error(`网络似乎在走神 (状态码: ${response.status})`);
+                }
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
                 let fullReply = "";
 
+                console.log("[MONITOR] 5. Starting to read stream...");
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        console.log("[MONITOR] 6. Stream finished.");
+                        break;
+                    }
 
                     const chunk = decoder.decode(value, { stream: true });
+                    console.log("[MONITOR] 5a. Received stream chunk:", chunk);
+
                     const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
                     for (const line of lines) {
-                        if (line.includes('[DONE]')) break;
+                        if (line.includes('[DONE]')) continue;
                         if (line.startsWith('data: ')) {
                             try {
                                 const data = JSON.parse(line.slice(6));
@@ -312,6 +326,7 @@
                     }
                     outputText.innerHTML = fullReply.replace(/\s*$$EMOTION_TAG: (\{.*?\})$$/, '').trim();
                 }
+                console.log("[MONITOR] 7. Full reply constructed:", fullReply);
 
                 // [FIX #3] Robustly parse the emotion tag with a try-catch block.
                 let emotionTag = null;
@@ -324,6 +339,7 @@
                         emotionTag = JSON.parse(match[1]);
                         cleanReply = fullReply.replace(tagRegex, '').trim();
                         outputText.innerHTML = cleanReply;
+                        console.log("[MONITOR] 8. Emotion tag parsed successfully.");
                     } catch (e) {
                         console.error("Failed to parse final emotion tag:", e);
                     }
@@ -334,8 +350,8 @@
                 }
 
             } catch (error) {
+                console.error("[MONITOR] CRITICAL ERROR in fetchDeepSeek:", error);
                 outputText.innerHTML = `抱歉，微光未能及时照达。<br>${error.message}`;
-                console.error(error);
             } finally {
                 outputText.classList.remove('typing-cursor');
                 if(submitBtn) {
@@ -344,6 +360,7 @@
                 }
                 input.disabled = false;
                 setTimeout(() => { bottomNav.style.opacity = '1'; }, 800);
+                console.log("[MONITOR] 9. fetchDeepSeek finished.");
             }
         }
 
