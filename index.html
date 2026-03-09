@@ -142,17 +142,17 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // --- Firebase SDK ---
+        // --- [REFACTORED] Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // --- 全局状态与配置 ---
+        // --- [REFACTORED] Global State & Configuration ---
         let currentUser = null;
         let authInitialized = false;
-        let db;
-        let auth;
+        let db, auth;
 
+        // [FIX #1] Globally define the System Prompt Template to prevent "Can't find variable" error.
         const SYSTEM_PROMPT_TEMPLATE = `你是一位温柔且【极其克制】的资深心理专家，懂神经多样性（ADHD/ASD/ODD）。你正在抚慰一位精疲力尽的家长。
 
 孩子叫“__CHILD_NAME__”，特质是“__CHILD_TRAIT__”。
@@ -179,12 +179,12 @@
 3.  【物理行动】（约占40%）：提供一个【极其简单、当下就能做】的微小物理“任务”。
 4.  【重塑意义】（约占10%）：用一两句话，为此事的发生赋予一个积极、微小的意义。`;
 
-        // --- DOM 元素在此处声明，在 DOMContentLoaded 中初始化 ---
+        // --- [REFACTORED] DOM Element Declarations ---
         let authStatusContainer, loginModal, profileModal, input, submitArea, responseContainer, outputText, bottomNav, welcomeText, profileCard, toast;
 
-        // --- 等待 DOM 加载完成 ---
+        // [FIX #2] Defer all script execution until the DOM is fully loaded to prevent race conditions.
         document.addEventListener('DOMContentLoaded', () => {
-            // --- 初始化所有 DOM 元素 ---
+            // Initialize DOM elements
             authStatusContainer = document.getElementById('auth-status-container');
             loginModal = document.getElementById('loginModal');
             profileModal = document.getElementById('profileModal');
@@ -197,13 +197,13 @@
             profileCard = document.getElementById('profileCard');
             toast = document.getElementById('toast');
 
-            // --- 绑定核心事件 ---
+            // Bind core application events
             initializeAuthListener();
             bindInputEvents();
             checkInitialProfile();
         });
 
-        // --- 核心功能函数 ---
+        // --- [REFACTORED] Core Functions ---
 
         function initializeAuthListener() {
             if (authInitialized) return;
@@ -211,7 +211,7 @@
 
             const authTimeout = setTimeout(() => {
                 if (!authResponded) {
-                    console.warn("Firebase Auth 响应超时，进入离线模式。");
+                    console.warn("Firebase Auth timed out. Entering offline mode.");
                     authResponded = true;
                     updateUIForUser('offline');
                 }
@@ -240,7 +240,7 @@
                 });
                 authInitialized = true;
             } catch (error) {
-                console.error("Firebase 初始化失败:", error);
+                console.error("Firebase initialization failed:", error);
                 if (!authResponded) {
                     clearTimeout(authTimeout);
                     authResponded = true;
@@ -258,11 +258,10 @@
                 .replace('__CHILD_NAME__', childName)
                 .replace('__CHILD_TRAIT__', childTrait);
 
-            const finalPrompt = (systemPrompt) ? systemPrompt : "你是一位温暖的心理支持助手，请尽力帮助用户。";
+            const finalPrompt = systemPrompt || "你是一位温暖的心理支持助手，请尽力帮助用户。";
 
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
-            const btnArrow = document.getElementById('btnArrow');
 
             try {
                 if(submitBtn) {
@@ -276,7 +275,13 @@
                 const response = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ messages: [{ role: "system", content: finalPrompt }, { role: "user", content: text }], stream: true, temperature: 0.5, frequency_penalty: 0, presence_penalty: 0 })
+                    body: JSON.stringify({ 
+                        messages: [{ role: "system", content: finalPrompt }, { role: "user", content: text }], 
+                        stream: true, 
+                        temperature: 0.5, 
+                        frequency_penalty: 0, 
+                        presence_penalty: 0 
+                    })
                 });
 
                 if (!response.ok) throw new Error('网络似乎在走神');
@@ -284,7 +289,6 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
                 let fullReply = "";
-                let emotionTag = null;
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -302,13 +306,15 @@
                                     fullReply += data.choices[0].delta.content;
                                 }
                             } catch (e) {
-                                console.error("解析数据流中的JSON失败:", line, e);
+                                console.error("Failed to parse JSON from stream:", line, e);
                             }
                         }
                     }
                     outputText.innerHTML = fullReply.replace(/\s*$$EMOTION_TAG: (\{.*?\})$$/, '').trim();
                 }
 
+                // [FIX #3] Robustly parse the emotion tag with a try-catch block.
+                let emotionTag = null;
                 const tagRegex = /\s*$$EMOTION_TAG: (\{.*?\})$$/;
                 const match = fullReply.match(tagRegex);
                 let cleanReply = fullReply;
@@ -319,7 +325,7 @@
                         cleanReply = fullReply.replace(tagRegex, '').trim();
                         outputText.innerHTML = cleanReply;
                     } catch (e) {
-                        console.error("最终情绪标签解析失败: ", e);
+                        console.error("Failed to parse final emotion tag:", e);
                     }
                 }
                 
@@ -353,11 +359,11 @@
                     childProfile: JSON.parse(localStorage.getItem('child_profile') || '{}')
                 });
             } catch (error) {
-                console.error("保存交互记录失败:", error);
+                console.error("Failed to save interaction:", error);
             }
         }
 
-        // --- UI 更新与交互 ---
+        // --- [REFACTORED] UI & Utility Functions ---
 
         function updateUIForUser(userOrState) {
             if (!authStatusContainer) return;
@@ -401,6 +407,7 @@
         }
         
         function showToast(message) {
+            if (!toast) return;
             toast.innerText = message;
             toast.style.transform = 'translateY(0)';
             toast.style.opacity = '1';
@@ -424,7 +431,7 @@
             localStorage.setItem('adhd_diaries', JSON.stringify(diaries));
         }
 
-        // --- 公开到全局的函数 ---
+        // --- [REFACTORED] Global Event Handlers ---
         window.openProfileModal = function() {
             const savedProfile = localStorage.getItem('child_profile');
             if (savedProfile) {
@@ -476,10 +483,7 @@
             await fetchDeepSeek(userText);
         }
         
-        // 同样需要暴露登录/注册模态框的函数
         window.openLoginModal = function() {
-            // 假设你有一个 id="loginModal" 的元素
-            const loginModal = document.getElementById('loginModal');
             if(loginModal) {
                 loginModal.classList.remove('hidden');
                 setTimeout(() => loginModal.classList.remove('opacity-0'), 10);
